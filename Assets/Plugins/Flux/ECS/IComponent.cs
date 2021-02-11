@@ -1,1 +1,4 @@
-﻿public interface IComponent { }
+﻿namespace Flux
+{
+    public interface IComponent { }
+}

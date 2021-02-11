@@ -1,115 +1,181 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
-public static class Hub
+namespace Flux
 {
-    
-}
-
-public struct Position : IBridge<Transform>
-{
-    public Vector3 value;
-    
-    public void ReceiveDataFrom(Transform source)
+    public class Entity : MonoBehaviour
     {
-        value = source.position;
-    }
-
-    public void SendDataTo(Transform destination)
-    {
-        destination.position = value;
-    }
-}
-
-public class Entity : MonoBehaviour
-{
-    [SerializeReference] private List<IComponent> components;
+        public IEnumerable<int> Keys => lookups.Keys;
+        public IEnumerable<IComponent> Components => components;
+        
+        [SerializeReference] private List<IComponent> components = new List<IComponent>();
     
-    private Dictionary<int, int> lookupTable;
-    
-    private List<int> availableBridgeKeys;
-    private Dictionary<int, int> linkLookupTable;
-    
-    private Dictionary<int, Link> links;
+        private Dictionary<int, int> lookups;
+        private Dictionary<int, Link> links;
 
-    void Update()
-    {
+        /*void Update()
+        {
         if (Input.GetKeyDown(KeyCode.E))
         {
             var someObject = gameObject.GetComponent<Test>();
 
             var key = typeof(Position).GetHashCode();
-            var position = (Position)this[key];
+            if (!lookups.ContainsKey(key)) return;
             
+            var position = (Position)this[key];
             someObject.Modify(ref position);
             SetComponent(position);
-            
-            if (linkLookupTable.TryGetValue(key, out var id)) links[id].ReceiveEntityData(this);
-        }
-    }
 
-    public IComponent this[int key] => components[lookupTable[key]];
-    
-    public new T GetComponent<T>() where T : IComponent => (T)components[lookupTable[typeof(T).GetHashCode()]];
-    public void SetComponent(IComponent component) => components[lookupTable[component.GetType().GetHashCode()]] = component;
-    
-    void Awake()
-    {
-        lookupTable = new Dictionary<int, int>();
-        availableBridgeKeys = new List<int>();
+            if (Hub.LinkLookups.TryGetValue(key, out var linkLookups))
+            {
+                foreach (var linkLookup in linkLookups)
+                {
+                    if (links.TryGetValue(linkLookup, out var link)) link.ReceiveEntityData(position);
+                }
+            }
+        }
         
-        for (var i = 0; i < components.Count; i++)
+        if (Input.GetKeyDown(KeyCode.T)) RemoveComponent<Position>();
+        if (Input.GetKeyDown(KeyCode.Y)) AddComponent(new Rotation());
+
+        if (Input.GetKeyDown(KeyCode.R))
         {
-            var component = components[i];
+            var someObject = gameObject.GetComponent<Test>();
+
+            var key = typeof(Rotation).GetHashCode();
+            if (!lookups.ContainsKey(key)) return;
+            
+            var rotation = (Rotation)this[key];
+            someObject.Rotate(ref rotation);
+            SetComponent(rotation);
+
+            if (Hub.LinkLookups.TryGetValue(key, out var linkLookups))
+            {
+                foreach (var linkLookup in linkLookups)
+                {
+                    if (links.TryGetValue(linkLookup, out var link)) link.ReceiveEntityData(rotation);
+                }
+            }
+        }
+    }*/
+
+        public IComponent this[int key] => components[lookups[key]];
+     
+        public new T GetComponent<T>() where T : IComponent => (T)components[lookups[typeof(T).GetHashCode()]];
+        public void SetComponent(IComponent component) => components[lookups[component.GetType().GetHashCode()]] = component;
+    
+        void Awake()
+        {
+            lookups = new Dictionary<int, int>();
+            links = new Dictionary<int, Link>();
+
+            for (var i = 0; i < components.Count; i++)
+            {
+                var key = components[i].GetType().GetHashCode();
+                if (lookups.ContainsKey(key))
+                {
+                    components.RemoveAt(i);
+                    i--;
+                
+                    continue;
+                }
+            
+                lookups.Add(key, i);
+                ActualizeLinksFor(key);
+            }
+        }
+
+        void OnEnable() => Hub.Register(this);
+        void OnDisable() => Hub.Unregister(this);
+
+        public void Receive<T>(WriteTo<T> method) where T : IComponent
+        {
+            var key = typeof(T).GetHashCode();
+            var component = (T)this[key];
+
+            method(ref component);
+            SetComponent(component);
+            
+            if (Hub.LinkLookups.TryGetValue(key, out var linkLookups))
+            {
+                foreach (var linkLookup in linkLookups)
+                {
+                    if (links.TryGetValue(linkLookup, out var link)) link.ReceiveEntityData(component);
+                }
+            }
+        }
+        public void Receive<T1,T2>(WW<T1,T2> method) where T1 : IComponent where T2 : IComponent
+        {
+            var compOne = GetComponent<T1>();
+            var compTwo = GetComponent<T2>();
+            
+            method(ref compOne, ref compTwo);
+            
+            var components = new IComponent[] {compOne, compTwo};
+            foreach (var component in components)
+            {
+                SetComponent(component);
+                if (Hub.LinkLookups.TryGetValue(component.GetTypeKey(), out var linkLookups))
+                {
+                    foreach (var linkLookup in linkLookups)
+                    {
+                        if (links.TryGetValue(linkLookup, out var link)) link.ReceiveEntityData(component);
+                    }
+                }
+            }
+        }
+        
+        public void AddComponent(IComponent component)
+        {
             var key = component.GetType().GetHashCode();
+            if (lookups.ContainsKey(key)) return;
+        
+            lookups.Add(key, components.Count);
+            components.Add(component);
+        
+            ActualizeLinksFor(key);
+        }
+        public void RemoveComponent<T>() where T : IComponent
+        {
+            var key = typeof(T).GetHashCode();
+            if (!lookups.ContainsKey(key)) return;
 
-            if (components[i] is IBridge) availableBridgeKeys.Add(key);
-            
-            if (lookupTable.ContainsKey(key))
+            components.RemoveAt(lookups[key]);
+            lookups.Remove(key);
+        
+            var existingLookups = new HashSet<int>();
+            for (var i = 0; i < components.Count; i++)
             {
-                components.RemoveAt(i);
-                i--;
-                
-                continue;
+                key = components[i].GetType().GetHashCode();
+                lookups[key] = i;
+
+                if (Hub.TryGetLinkLookupsFor(key, out var output))
+                {
+                    foreach (var linkLookup in output) existingLookups.Add(linkLookup);
+                }
             }
 
-            lookupTable.Add(key, i);
+            var linkLookups = links.Keys.ToArray();
+            foreach (var linkLookup in linkLookups)
+            {
+                if (existingLookups.Contains(linkLookup)) continue;
+                links.Remove(linkLookup);
+            }
         }
 
-        links = new Dictionary<int, Link>();
-        linkLookupTable = new Dictionary<int, int>();
-        
-        var matches = new List<int>();
-        foreach (var component in GetComponents<Component>())
+        private void ActualizeLinksFor(int key)
         {
-            var type = component.GetType();
-            var key = type.GetHashCode();
-
-            if (links.ContainsKey(key)) continue;
-            
-            var bridgeType = typeof(IBridge<>).MakeGenericType(type);
-            for (var i = 0; i < availableBridgeKeys.Count; i++)
+            if (Hub.TryGetLinkLookupsFor(key, out var linkLookups))
             {
-                if (!bridgeType.IsInstanceOfType(components[lookupTable[availableBridgeKeys[i]]])) continue;
-
-                matches.Add(availableBridgeKeys[i]);
-                linkLookupTable.Add(availableBridgeKeys[i], key);
-                
-                availableBridgeKeys.RemoveAt(i);
-                i--;
-            }
-            
-            if (matches.Any())
-            {
-                var linkType = typeof(Link<>).MakeGenericType(type);
-                var link = (Link) Activator.CreateInstance(linkType, component, matches);
-                link.SendUnityData(this);
-                
-                links.Add(key, link);
-                matches.Clear();
+                foreach (var linkLookup in linkLookups)
+                {
+                    if (links.ContainsKey(linkLookup) || !Hub.LinkFactories[linkLookup].TryCreateFor(this, out var link)) continue;
+                    
+                    links.Add(linkLookup, link);
+                    link.SendUnityData(this[key]);
+                }
             }
         }
     }
