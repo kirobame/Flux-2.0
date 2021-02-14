@@ -1,21 +1,47 @@
 ﻿using System;
-using System.Text;
-using UnityEngine;
 using UnityEngine.LowLevel;
-using UnityEngine.PlayerLoop;
 
 namespace Flux
 {
     public static class Extensions
     {
-        public static int GetTypeKey(this object value) => value.GetType().GetHashCode();
+        public static T GetCustomAttribute<T>(this Type type) where T : Attribute
+        {
+            foreach (var attribute in type.GetCustomAttributes(true))
+            {
+                if (attribute is T cast) return cast;
+            }
+
+            return null;
+        }
+
+        //---[System loop]----------------------------------------------------------------------------------------------/
         
-        public static PlayerLoopSystem InsertAt<T>(this PlayerLoopSystem loop, PlayerLoopSystem value)
+        internal static bool TryFind(this SystemUpdateWrapper updateWrapper, string name, out SystemUpdateWrapper result)
+        {
+            if (updateWrapper.Name == name)
+            {
+                result = updateWrapper;
+                return true;
+            }
+
+            foreach (var child in updateWrapper.Childs)
+            {
+                if (child.TryFind(name, out result)) return true;
+            }
+
+            result = null;
+            return false;
+        }
+        
+        //---[Player loop]----------------------------------------------------------------------------------------------/
+        
+        internal static PlayerLoopSystem InsertAt<T>(this PlayerLoopSystem loop, PlayerLoopSystem value)
         {
             InsertAt<T>(ref loop, value);
             return loop;
         }
-        private static bool InsertAt<T>(ref PlayerLoopSystem loop, PlayerLoopSystem value)
+        internal static bool InsertAt<T>(ref PlayerLoopSystem loop, PlayerLoopSystem value)
         {
             if (loop.type == typeof(T))
             {
@@ -43,16 +69,6 @@ namespace Flux
             }
 
             return false;
-        }
-
-        public static T GetCustomAttribute<T>(this Type type) where T : Attribute
-        {
-            foreach (var attribute in type.GetCustomAttributes(true))
-            {
-                if (attribute is T cast) return cast;
-            }
-
-            return null;
         }
     }
 }

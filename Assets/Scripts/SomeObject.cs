@@ -1,18 +1,15 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿using System;
+using System.Diagnostics;
 using UnityEngine;
-using UnityEngine.SceneManagement;
+using Debug = UnityEngine.Debug;
 
 public class SomeObject : MonoBehaviour
 {
-    void Start()
-    {
-        StartCoroutine(Routine());
-    }
+    private Type[] types;
 
-    private IEnumerator Routine()
+    void Awake()
     {
-        yield return new WaitForSeconds(1);
-        SceneManager.LoadScene(1);
+        types = new Type[1] {typeof(int)};
+        Debug.Log(typeof(int) == types[0]);
     }
 }

@@ -1,38 +1,40 @@
-﻿using UnityEngine;
-using Flux;
+﻿using Flux;
+using UnityEngine;
 
-[Group(1, 2)]
+[UpdateOrder("Root", "Any/OtherSystem")]
 public class SomeSystem : Flux.System
 {
     public override void Update()
     {
-        Debug.Log("1");
+        Debug.Log("SOME");
+        
         if (Input.GetKeyDown(KeyCode.P))
         {
-            Access.ForEach((ref Position position, ref Hue hue) =>
+            Entities.ForEach((Entity entity, ref Position position, ref Hue hue) =>
             {
                 position.value += Vector3.one;
+                Entities.MarkDirty<Transform>(entity, position);
                 
-                var color = hue.value;
-                color.r += 0.1f;
-                hue.value = color;
-            });
+                hue.value.r += 0.1f;
+                Entities.MarkDirty<SpriteRenderer>(entity, hue);
+            }, new SomeFlag(2));
         }
     }
 }
 
-public struct Position : IBridge<Transform>
+public class OtherSystem : Flux.System
 {
-    public Vector3 value;
-
-    public void ReceiveDataFrom(Transform source) => value = source.position;
-    public void SendDataTo(Transform destination) => destination.position = value;
+    public override void Update()
+    {
+        Debug.Log("OTHER");
+    }
 }
 
-public struct Hue : IBridge<SpriteRenderer>
+[UpdateOrder("OtherSystem", "Any/Any")]
+public class SubSystem : Flux.System
 {
-    public Color value;
-
-    public void ReceiveDataFrom(SpriteRenderer source) => value = source.color;
-    public void SendDataTo(SpriteRenderer destination) => destination.color = value;
+    public override void Update()
+    {
+        Debug.Log("SUB");
+    }
 }
