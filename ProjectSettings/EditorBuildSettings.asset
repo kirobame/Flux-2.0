@@ -11,4 +11,5 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/Scenes/Copy.unity
     guid: f4307f6764bff884bb2f138591112cbf
-  m_configObjects: {}
+  m_configObjects:
+    com.unity.addressableassets: {fileID: 11400000, guid: 4c5caaf4f7d935042a884273ca571759, type: 2}

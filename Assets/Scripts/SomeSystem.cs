@@ -1,9 +1,27 @@
-﻿using Flux;
+﻿using System;
+using System.Collections.Generic;
+using Flux;
 using UnityEngine;
+using UnityEngine.AddressableAssets;
 
-[UpdateOrder("Root", "Any/OtherSystem")]
-public class SomeSystem : Flux.System
+[UpdateOrder("Root", "OtherSystem/Any")]
+public class SomeSystem : BindedSystem
 {
+    protected void SetColor(Color value) => Color = value;
+    protected Color Color { get; set; }
+
+    protected void SetStep(Vector3 value) => Step = value;
+    protected Vector3 Step { get; set; }
+
+    protected void SetSomeData(SomeData value) => SomeData = value;
+    protected SomeData SomeData { get; set; }
+    
+    public override void Initialize()
+    {
+        base.Initialize();
+        AddPackage<SomeData>("SomeData", SetSomeData);
+    }
+
     public override void Update()
     {
         Debug.Log("SOME");
@@ -12,21 +30,13 @@ public class SomeSystem : Flux.System
         {
             Entities.ForEach((Entity entity, ref Position position, ref Hue hue) =>
             {
-                position.value += Vector3.one;
+                position.value += SomeData.Step;
                 Entities.MarkDirty<Transform>(entity, position);
                 
-                hue.value.r += 0.1f;
+                hue.value += SomeData.ColorStep;
                 Entities.MarkDirty<SpriteRenderer>(entity, hue);
-            }, new SomeFlag(2));
+            }, Country.France | Country.Britain);
         }
-    }
-}
-
-public class OtherSystem : Flux.System
-{
-    public override void Update()
-    {
-        Debug.Log("OTHER");
     }
 }
 
@@ -36,5 +46,13 @@ public class SubSystem : Flux.System
     public override void Update()
     {
         Debug.Log("SUB");
+    }
+}
+
+public class OtherSystem : Flux.System
+{
+    public override void Update()
+    {
+        Debug.Log("OTHER");
     }
 }
