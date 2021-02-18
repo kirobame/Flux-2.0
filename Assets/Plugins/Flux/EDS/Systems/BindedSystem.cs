@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using UnityEngine;
 using UnityEngine.AddressableAssets;
 using UnityEngine.ResourceManagement.AsyncOperations;
 
@@ -39,6 +40,8 @@ namespace Flux
         }
         #endregion
 
+        //---[Initialization]-------------------------------------------------------------------------------------------/
+        
         private Dictionary<int, Relay> unresolvedRelays;
         
         public override void Initialize()
@@ -46,8 +49,10 @@ namespace Flux
             unresolvedRelays = new Dictionary<int, Relay>();
             IsActive = false;
         }
+        
+        //---[Data binding]---------------------------------------------------------------------------------------------/
 
-        protected void AddPackage<T>(string address, Action<T> setter)
+        protected void BindWhole<T>(string address, Action<T> setter)
         {
             var handle = Addressables.LoadAssetAsync<T>(address);
             unresolvedRelays.Add(handle.GetHashCode(), new Package<T>(setter));
@@ -55,19 +60,23 @@ namespace Flux
             handle.Completed += ResolveRelay;
         }
 
-        protected void AddBinding<TSource,T1>(string address, Action<T1> relayOne) where TSource : IWrapper
+        protected void BindTo<TSource,T1>(string address, Action<T1> relayOne) where TSource : IWrapper
         {
-            AddBinding<TSource>(address, new Binding<T1>(relayOne));
+            BindTo<TSource>(address, new Binding<T1>(relayOne));
         }
-        protected void AddBinding<TSource,T1,T2>(string address, Action<T1> relayOne, Action<T2> relayTwo) where TSource : IWrapper
+        protected void BindTo<TSource,T1,T2>(string address, Action<T1> relayOne, Action<T2> relayTwo) where TSource : IWrapper
         {
-            AddBinding<TSource>(address, new Binding<T1>(relayOne), new Binding<T2>(relayTwo));
+            BindTo<TSource>(address, new Binding<T1>(relayOne), new Binding<T2>(relayTwo));
         }
-        protected void AddBinding<TSource,T1,T2,T3>(string address, Action<T1> relayOne, Action<T2> relayTwo, Action<T3> relayThree) where TSource : IWrapper
+        protected void BindTo<TSource,T1,T2,T3>(string address, Action<T1> relayOne, Action<T2> relayTwo, Action<T3> relayThree) where TSource : IWrapper
         {
-            AddBinding<TSource>(address, new Binding<T1>(relayOne), new Binding<T2>(relayTwo), new Binding<T3>(relayThree));
+            BindTo<TSource>(address, new Binding<T1>(relayOne), new Binding<T2>(relayTwo), new Binding<T3>(relayThree));
         }
-        private void AddBinding<T>(string address, params Relay[] relays)
+        protected void BindTo<TSource,T1,T2,T3,T4>(string address, Action<T1> relayOne, Action<T2> relayTwo, Action<T3> relayThree, Action<T4> relayFour) where TSource : IWrapper
+        {
+            BindTo<TSource>(address, new Binding<T1>(relayOne), new Binding<T2>(relayTwo), new Binding<T3>(relayThree), new Binding<T4>(relayFour));
+        }
+        private void BindTo<T>(string address, params Relay[] relays)
         {
             var handle = Addressables.LoadAssetAsync<T>(address);
             unresolvedRelays.Add(handle.GetHashCode(), new RelayGroup(relays));
@@ -86,6 +95,8 @@ namespace Flux
         {
             unresolvedRelays.Remove(key);
             if (unresolvedRelays.Count != 0) return;
+            
+            Debug.Log("FINISHED");
             
             IsActive = true;
             unresolvedRelays = null;

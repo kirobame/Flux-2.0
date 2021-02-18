@@ -9,7 +9,7 @@ namespace Flux
         public FlagTranslator() => lookups = new Dictionary<Type, ushort>();
         
         private Dictionary<Type, ushort> lookups;
-
+        
         public int Translate(Enum flag)
         {
             byte value;
@@ -30,5 +30,7 @@ namespace Flux
 
             return offset + value;
         }
+        
+        public void Reset() => lookups.Clear();
     }
 }

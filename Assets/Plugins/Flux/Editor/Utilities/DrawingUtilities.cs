@@ -12,6 +12,7 @@ namespace Flux.Editor
             
             return new Rect(position, new Vector2(width, rect.height));
         }
+        
         public static (Rect left, Rect right) Split(this Rect rect, float spacing = 0.0f)
         {
             (Rect left, Rect right) output;

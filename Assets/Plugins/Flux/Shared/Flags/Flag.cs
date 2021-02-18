@@ -2,9 +2,9 @@
 
 namespace Flux
 {
-    public struct SimpleFlag : IFlag
+    public struct Flag : IFlag
     {
-        public SimpleFlag(Enum value) => Value = value;
+        public Flag(Enum value) => Value = value;
         
         public Enum Value { get; private set; }
     }
