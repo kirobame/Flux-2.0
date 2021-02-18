@@ -329,7 +329,7 @@ namespace Flux
         
         public void AddFlag(Enum flag)
         {
-            flags.Add(new SimpleFlag(flag));
+            flags.Add(new Flag(flag));
             onFlagAddition?.Invoke(this, flag);
         }
         public void RemoveFlag(Enum flag)

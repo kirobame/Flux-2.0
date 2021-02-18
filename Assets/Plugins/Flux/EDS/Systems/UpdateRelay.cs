@@ -71,7 +71,7 @@ namespace Flux
         } 
         public override void Update()
         {
-            value.Update();
+            if (value.IsActive) value.Update();
             foreach (var child in childs) child.Update();
         } 
     }
