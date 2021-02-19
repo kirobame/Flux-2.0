@@ -309,6 +309,7 @@ GameObject:
   - component: {fileID: 1423584227}
   - component: {fileID: 1423584228}
   - component: {fileID: 1423584229}
+  - component: {fileID: 1423584230}
   m_Layer: 0
   m_Name: Object
   m_TagString: Untagged
@@ -413,3 +414,61 @@ SpriteRenderer:
   m_WasSpriteAssigned: 0
   m_MaskInteraction: 0
   m_SpriteSortPoint: 0
+--- !u!114 &1423584230
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1423584226}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: de8222073adb07b4c9e770fb57695fd5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  root:
+    rect:
+      serializedVersion: 2
+      x: 100
+      y: 100
+      width: 73
+      height: 77
+    linkIndices: 0000000000000000
+  effects:
+  - id: 0
+  - id: 1
+  - id: 2
+  references:
+    version: 1
+    00000000:
+      type: {class: Empty, ns: Flux, asm: Assembly-CSharp-firstpass}
+      data:
+        rect:
+          serializedVersion: 2
+          x: 385
+          y: 249
+          width: 102
+          height: 77
+        linkIndices: 0100000002000000
+    00000001:
+      type: {class: Display, ns: Flux, asm: Assembly-CSharp-firstpass}
+      data:
+        rect:
+          serializedVersion: 2
+          x: 636
+          y: 161
+          width: 102
+          height: 77
+        linkIndices: 
+        message: 
+    00000002:
+      type: {class: Display, ns: Flux, asm: Assembly-CSharp-firstpass}
+      data:
+        rect:
+          serializedVersion: 2
+          x: 637
+          y: 357
+          width: 102
+          height: 77
+        linkIndices: 
+        message: 

@@ -96,8 +96,6 @@ namespace Flux
             unresolvedRelays.Remove(key);
             if (unresolvedRelays.Count != 0) return;
             
-            Debug.Log("FINISHED");
-            
             IsActive = true;
             unresolvedRelays = null;
         }

@@ -14,5 +14,13 @@ namespace Flux.Editor
 
             return property.serializedObject.FindProperty(path);
         }
+
+        public static SerializedProperty NewElementAtEnd(this SerializedProperty arrayProperty)
+        {
+            if (arrayProperty.arraySize == 0) arrayProperty.InsertArrayElementAtIndex(0);
+            else arrayProperty.InsertArrayElementAtIndex(arrayProperty.arraySize - 1);
+                
+            return arrayProperty.GetArrayElementAtIndex(arrayProperty.arraySize - 1);
+        }
     }
 }
