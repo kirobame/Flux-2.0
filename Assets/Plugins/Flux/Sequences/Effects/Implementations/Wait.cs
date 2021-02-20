@@ -3,15 +3,15 @@ using UnityEngine;
 
 namespace Flux
 {
-    [Serializable, Path("One/SubOne")]
+    [Path("Utilities")]
     public class Wait : Effect
     {
         [SerializeField] private float time;
         private float counter;
 
-        public override void Reset()
+        public override void Ready()
         {
-            base.Reset();
+            base.Ready();
             counter = time;
         }
 

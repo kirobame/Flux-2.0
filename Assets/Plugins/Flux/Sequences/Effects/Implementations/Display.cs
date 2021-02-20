@@ -3,15 +3,17 @@ using UnityEngine;
 
 namespace Flux
 {
-    [Serializable, Path("Three/SubThree")]
-    public class Display : InstantEffect
+    [Path("Utilities")]
+    public class Display : Effect
     {
         [SerializeField] private string message;
 
-        protected override EventArgs OnTraversed(EventArgs args)
+        protected override void OnUpdate(EventArgs args)
         {
             Debug.Log(message);
-            return base.OnTraversed(args);
+            IsDone = true;
+
+            return;
         }
     }
 }

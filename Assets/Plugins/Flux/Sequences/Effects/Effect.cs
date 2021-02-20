@@ -9,6 +9,8 @@ namespace Flux
     {
         public Effect() { }
         
+        //---[Data]-----------------------------------------------------------------------------------------------------/
+        
         public bool IsDone { get; protected set; }
         
         #if UNITY_EDITOR
@@ -20,8 +22,21 @@ namespace Flux
 
         void IEffect.Inject(Effect[] links) => this.links = links;
         private Effect[] links;
+        
+        //---[Initializations]------------------------------------------------------------------------------------------/
 
-        public virtual void Reset() => IsDone = false;
+        public virtual void Bootup(Effect root, IReadOnlyList<Effect> effects) { }
+        public virtual void Ready() => IsDone = false;
+        
+        public void Reset()
+        {
+            OnReset();
+            foreach (var link in links) link.Reset();
+        }
+        protected virtual void OnReset() => Ready();
+        
+        //---[Flow control]---------------------------------------------------------------------------------------------/
+        
         public bool Update(EventArgs args)
         {
             if (!IsDone)

@@ -17,6 +17,8 @@ namespace Flux.Editor
 
         private Texture2D indent;
         
+        //---[Initialization]-------------------------------------------------------------------------------------------/
+        
         public void Initialize(EditorWindow window, SequenceGraphView graphView)
         {
             this.window = window;
@@ -50,6 +52,8 @@ namespace Flux.Editor
             
             hasBeenInitialized = true;
         }
+        
+        //---[Implementation]-------------------------------------------------------------------------------------------/
         
         public List<SearchTreeEntry> CreateSearchTree(SearchWindowContext context)
         {

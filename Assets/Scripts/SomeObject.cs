@@ -1,17 +1,16 @@
 ﻿using System;
 using System.Diagnostics;
 using System.Linq;
+using Flux;
 using UnityEngine;
 using UnityEngine.AddressableAssets;
-using Debug = UnityEngine.Debug;
 
 public class SomeObject : MonoBehaviour
 {
-    private Type[] types;
+    [SerializeField] private Sequencer sequencer;
 
-    void Awake()
+    void Update()
     {
-        types = new Type[1] {typeof(int)};
-        Debug.Log(typeof(int) == types[0]);
+        if (Input.GetKeyDown(KeyCode.M)) sequencer.Play(EventArgs.Empty);
     }
 }

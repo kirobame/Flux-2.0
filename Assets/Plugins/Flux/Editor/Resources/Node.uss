@@ -1,0 +1,5 @@
+﻿SequenceNode #title
+{
+    height: 30px;
+    background-color: rgba(41, 134, 150, 0.75);
+}

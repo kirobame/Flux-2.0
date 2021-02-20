@@ -1,0 +1,4 @@
+﻿Label
+{
+    min-width: 100px;
+}

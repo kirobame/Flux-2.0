@@ -9,22 +9,18 @@ namespace Flux
     public class Sequencer : MonoBehaviour
     {
         [HideInInspector, SerializeField] private Empty root = new Empty();
-        [SerializeReference] private List<Effect> effects = new List<Effect>();
-
+        [HideInInspector, SerializeReference] private List<Effect> effects = new List<Effect>();
+        
         private EventArgs args;
         private bool isPlaying;
+        
+        //---[Initialization]-------------------------------------------------------------------------------------------/
         
         void Awake()
         {
             Initialize(root);
             foreach (var effect in effects) Initialize(effect);
         }
-
-        void Update()
-        {
-            if (isPlaying) isPlaying = !root.Update(args);
-        }
-
         private void Initialize(Effect effect)
         {
             var cast = (IEffect)effect;
@@ -39,14 +35,22 @@ namespace Flux
             }
                 
             cast.Inject(links);
+            effect.Bootup(root, effects);
+        }
+        
+        //---[Core]-----------------------------------------------------------------------------------------------------/
+
+        void Update()
+        {
+            if (isPlaying) isPlaying = !root.Update(args);
         }
         
         public void Play(EventArgs args)
         {
             this.args = args;
             
-            root.Reset();
-            foreach (var effect in effects) effect.Reset();
+            root.Ready();
+            foreach (var effect in effects) effect.Ready();
 
             isPlaying = true;
         }

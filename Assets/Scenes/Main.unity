@@ -298,6 +298,60 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &1030893180
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1030893182}
+  - component: {fileID: 1030893181}
+  m_Layer: 0
+  m_Name: GameObject
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1030893181
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1030893180}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: de8222073adb07b4c9e770fb57695fd5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  root:
+    rect:
+      serializedVersion: 2
+      x: 0
+      y: 0
+      width: 73
+      height: 71
+    linkIndices: 
+  effects: []
+  references:
+    version: 1
+--- !u!4 &1030893182
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1030893180}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_RootOrder: 3
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1423584226
 GameObject:
   m_ObjectHideFlags: 0
@@ -310,6 +364,7 @@ GameObject:
   - component: {fileID: 1423584228}
   - component: {fileID: 1423584229}
   - component: {fileID: 1423584230}
+  - component: {fileID: 1423584231}
   m_Layer: 0
   m_Name: Object
   m_TagString: Untagged
@@ -429,46 +484,36 @@ MonoBehaviour:
   root:
     rect:
       serializedVersion: 2
-      x: 100
-      y: 100
+      x: 0
+      y: 0
       width: 73
-      height: 77
-    linkIndices: 0000000000000000
+      height: 71
+    linkIndices: 00000000
   effects:
   - id: 0
-  - id: 1
-  - id: 2
   references:
     version: 1
     00000000:
-      type: {class: Empty, ns: Flux, asm: Assembly-CSharp-firstpass}
+      type: {class: Label, ns: Flux, asm: Assembly-CSharp-firstpass}
       data:
         rect:
           serializedVersion: 2
-          x: 385
-          y: 249
-          width: 102
-          height: 77
-        linkIndices: 0100000002000000
-    00000001:
-      type: {class: Display, ns: Flux, asm: Assembly-CSharp-firstpass}
-      data:
-        rect:
-          serializedVersion: 2
-          x: 636
-          y: 161
-          width: 102
-          height: 77
+          x: 150
+          y: -1
+          width: 156
+          height: 99
         linkIndices: 
-        message: 
-    00000002:
-      type: {class: Display, ns: Flux, asm: Assembly-CSharp-firstpass}
-      data:
-        rect:
-          serializedVersion: 2
-          x: 637
-          y: 357
-          width: 102
-          height: 77
-        linkIndices: 
-        message: 
+        name: LOOP
+--- !u!114 &1423584231
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1423584226}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6d783a18cb0eb7f469c3a21fc333ebc3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  sequencer: {fileID: 1423584230}

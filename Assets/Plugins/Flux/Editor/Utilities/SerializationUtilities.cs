@@ -5,14 +5,21 @@ namespace Flux.Editor
 {
     public static class SerializationUtilities
     {
-        public static bool IsRoot(this SerializedProperty property) => property.propertyPath.Count(letter => letter == '/') == 0;
-        public static SerializedProperty GetParent(this SerializedProperty property)
-        {
-            var path = property.propertyPath;
-            var index = path.LastIndexOf('/');
-            path = path.Remove(index, path.Length - index);
+        public static bool IsRoot(this SerializedProperty property) => property.propertyPath.Count(letter => letter == '.') == 0;
 
-            return property.serializedObject.FindProperty(path);
+        public static string GetName(this SerializedProperty property)
+        {
+            var split = property.propertyPath.Split('.');
+            
+            if (split.Length <= 1) return property.propertyPath;
+            else return split[split.Length - 1];
+        }
+        public static string GetParentName(this SerializedProperty property)
+        {
+            var split = property.propertyPath.Split('.');
+            
+            if (split.Length <= 1) return string.Empty;
+            else return split[split.Length - 2];
         }
 
         public static SerializedProperty NewElementAtEnd(this SerializedProperty arrayProperty)

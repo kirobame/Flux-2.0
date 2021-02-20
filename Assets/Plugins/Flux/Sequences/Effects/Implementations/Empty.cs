@@ -2,9 +2,13 @@
 
 namespace Flux
 {
-    [Serializable]
+    [Serializable, Path("Utilities")]
     public class Empty : Effect
     {
-        protected override void OnUpdate(EventArgs args) => IsDone = true;
+        protected override void OnUpdate(EventArgs args)
+        {
+            IsDone = true;
+            return;
+        }
     }
 }

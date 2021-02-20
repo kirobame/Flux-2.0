@@ -16,11 +16,15 @@ namespace Flux.Editor
             values = new List<T>();
         }
         
+        //---[Data]-----------------------------------------------------------------------------------------------------/
+        
         public string Name { get; private set; }
         public IEnumerable<T> Values => values;
 
         private List<T> values;
         private List<Category<T>> subCategories;
+        
+        //---[Resource handling]----------------------------------------------------------------------------------------/
 
         public void Add(T value) => values.Add(value);
         public void Add(Category<T> subCategory) => subCategories.Add(subCategory);
@@ -36,6 +40,12 @@ namespace Flux.Editor
         {
             if (splitSubSource[index] == Name)
             {
+                if (index == splitSubSource.Length - 1)
+                {
+                    output = this;
+                    return true;
+                }
+                
                 foreach (var subCategory in subCategories)
                 {
                     if (!subCategory.TryGet(splitSubSource, index + 1, out output)) continue;
@@ -63,6 +73,8 @@ namespace Flux.Editor
             output = null;
             return false;
         }
+        
+        //---[Recursion accesses]---------------------------------------------------------------------------------------/
         
         public void Relay(Action<Category<T>,int> predicate, int depth, bool use = true)
         {

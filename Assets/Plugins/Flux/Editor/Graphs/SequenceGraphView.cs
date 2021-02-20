@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEditor;
 using UnityEditor.Experimental.GraphView;
+using UnityEditor.UIElements;
 using UnityEngine;
 using UnityEngine.UIElements;
 
@@ -10,15 +11,9 @@ namespace Flux.Editor
 {
     public class SequenceGraphView : GraphView
     {
-        private SerializedObject serializedObject;
-        private SerializedProperty rootProperty;
-        private SerializedProperty arrayProperty;
-
-        private EditorWindow window;
-        private NodeSearchWindow searchWindow;
-        
         public SequenceGraphView(EditorWindow window)
         {
+            this.window = window;
             styleSheets.Add(Resources.Load<StyleSheet>("SequenceGraph"));
             
             SetupZoom(ContentZoomer.DefaultMinScale, ContentZoomer.DefaultMaxScale);
@@ -30,29 +25,35 @@ namespace Flux.Editor
             Insert(0, grid);
             grid.StretchToParentSize();
 
+            cachedNodes = new List<SequenceNode>();
+            cachedEdges = new List<Edge>();
+            
             searchWindow = ScriptableObject.CreateInstance<NodeSearchWindow>();
             searchWindow.Initialize(window, this);
             nodeCreationRequest += ctxt => SearchWindow.Open(new SearchWindowContext(ctxt.screenMousePosition), searchWindow);
             
             deleteSelection += DeleteSelection;
-        }
-
-        public override List<Port> GetCompatiblePorts(Port startPort, NodeAdapter nodeAdapter)
-        {
-            var compatiblePorts = new List<Port>();
-            ports.ForEach(port => { if (startPort != port && startPort.node != port.node) compatiblePorts.Add(port); });
-
-            return compatiblePorts;
+            graphViewChanged += OnChange;
         }
         
-        private SerializedProperty GetPropertyFor(SequenceNode node)
-        {
-            if (node.index == -1) return rootProperty.Copy();
-            else return arrayProperty.GetArrayElementAtIndex(node.index);
-        }
+        //---[Data]-----------------------------------------------------------------------------------------------------/
+        
+        private int id;
+        private SerializedObject serializedObject;
+        private SerializedProperty rootProperty;
+        private SerializedProperty arrayProperty;
+
+        private EditorWindow window;
+        private NodeSearchWindow searchWindow;
+
+        private List<SequenceNode> cachedNodes;
+        private List<Edge> cachedEdges;
+
+        //---[Loading]--------------------------------------------------------------------------------------------------/
         
         public void Load(Sequencer sequencer, SerializedObject serializedObject)
         {
+            id = sequencer.GetInstanceID();
             this.serializedObject = serializedObject;
             
             var serializedProperty = serializedObject.GetIterator();
@@ -66,69 +67,71 @@ namespace Flux.Editor
             arrayProperty = serializedProperty.Copy();
             
             FetchNodes();
+            FrameAll();
         }
         private void CreateRootNode()
         {
             var rootNode = CreateNodeFrom(rootProperty, serializedObject, "Root", false);
             rootNode.index = -1;
             rootNode.capabilities = Capabilities.Ascendable | Capabilities.Collapsible | Capabilities.Selectable;
-            AddElement(rootNode);
+            
+            AddNode(rootNode);
         }
         private void FetchNodes()
         {
-            var cachedNodes = new Node[arrayProperty.arraySize];
-            
             for (var i = 0; i < arrayProperty.arraySize; i++)
             {
                 var subProperty = arrayProperty.GetArrayElementAtIndex(i);
                 var node = CreateNodeFrom(subProperty, serializedObject);
                 node.index = i;
 
-                cachedNodes[i] = node;
-                AddElement(node);
+                AddNode(node);
             }
 
-            nodes.ForEach(node =>
+            foreach (var node in cachedNodes)
             {
-                var sequenceNode = (SequenceNode)node;
-                
-                var subProperty =  GetPropertyFor(sequenceNode);
+                var subProperty = GetPropertyFor(node);
                 subProperty.Next(true);
                 subProperty.Next(false);
-
+                
                 for (var i = 0; i < subProperty.arraySize; i++)
                 {
                     var indexProperty = subProperty.GetArrayElementAtIndex(i);
                     var edge = new Edge()
                     {
-                        output = sequenceNode.outputContainer.Q<Port>(),
-                        input = cachedNodes[indexProperty.intValue].inputContainer.Q<Port>()
-                        
+                        output = node.outputContainer.Q<Port>(),
+                        input = cachedNodes[indexProperty.intValue + 1].inputContainer.Q<Port>()
+
                     };
                     
                     edge?.input.Connect(edge);
                     edge?.output.Connect(edge);
-                    
+
+                    cachedEdges.Add(edge);
                     Add(edge);
                 }
-            });
+            }
         }
+        
+        //---[Unloading]------------------------------------------------------------------------------------------------/
         
         public void Unload()
         {
-            nodes.ForEach(node =>
+            if (id == 0) return;
+            if (serializedObject == null) serializedObject = new SerializedObject((Sequencer)EditorUtility.InstanceIDToObject(id));
+            
+            foreach (var node in cachedNodes)
             {
-                var sequenceNode = (SequenceNode)node;
-                var subProperty = GetPropertyFor(sequenceNode);
+                var subProperty = GetPropertyFor(node);
                 
                 subProperty.Next(true);
-                subProperty.rectValue = sequenceNode.GetPosition();
+                subProperty.rectValue = node.GetPosition();
                 
                 subProperty.Next(false);
                 subProperty.arraySize = 0;
-            });
+            }
 
-            edges.ForEach(edge =>
+            foreach (var edge in cachedEdges)
             {
                 var inputNode = (SequenceNode)edge.input.node;
                 var outputNode = (SequenceNode)edge.output.node;
@@ -139,10 +142,18 @@ namespace Flux.Editor
 
                 var indexProperty = outputProperty.NewElementAtEnd();
                 indexProperty.intValue = inputNode.index;
-            });
+            }
 
             serializedObject.ApplyModifiedProperties();
+
+            foreach (var edge in cachedEdges) RemoveElement(edge);
+            cachedEdges.Clear();
+            
+            foreach (var node in cachedNodes) RemoveElement(node);
+            cachedNodes.Clear();
         }
+        
+        //---[Node creation]--------------------------------------------------------------------------------------------/
 
         public void AddNode(Type nodeType, Vector2 position)
         {
@@ -159,12 +170,14 @@ namespace Flux.Editor
 
             var node = CreateNodeFrom(subProperty, serializedObject, nodeType.Name);
             node.index = arrayProperty.arraySize - 1;
-            AddElement(node);
+            
+            AddNode(node);
         }
         private SequenceNode CreateNodeFrom(SerializedProperty property, SerializedObject serializedObject, string overrideName = "", bool hasInput = true)
         {
             var copy = property.Copy();
             copy.Next(true);
+            var rect = copy.rectValue;
 
             var name = overrideName;
             if (overrideName == string.Empty)
@@ -172,7 +185,9 @@ namespace Flux.Editor
                 name = property.managedReferenceFullTypename.Split(' ').Last();
                 if (name.Contains('.')) name = name.Split('.').Last();
             }
+            
             var node = new SequenceNode() { title = name };
+            node.styleSheets.Add(Resources.Load<StyleSheet>("Node"));
 
             if (hasInput)
             {
@@ -188,111 +203,93 @@ namespace Flux.Editor
             node.RefreshExpandedState();
             node.RefreshPorts();
             
-            var rect = copy.rectValue;
+            var box = new Box();
+            var shouldAddPropertyBox = false;
+            box.styleSheets.Add(Resources.Load<StyleSheet>("Box"));
+
+            var propertyName = property.GetName();
+            var propertyStyle = Resources.Load<StyleSheet>("Label");
+            
+            while (copy.NextVisible(false))
+            {
+                var parentName = copy.GetParentName();
+                if (propertyName != parentName) break;
+                
+                var propertyField = new PropertyField(copy);
+                propertyField.styleSheets.Add(propertyStyle);
+                propertyField.Bind(serializedObject);
+                box.Add(propertyField);
+                shouldAddPropertyBox = true;
+            }
+            
+            if (shouldAddPropertyBox) node.mainContainer.Add(box);
             node.SetPosition(rect);
             
             return node;
         }
-
-        void DeleteSelection(string operationName, AskUser askUser)
-        {
-            Debug.Log(operationName);
-        }
         
-        /*private readonly Vector2 defaultSize = new Vector2(200, 150);
-        
-        public SequenceGraphView()
-        {
-            styleSheets.Add(Resources.Load<StyleSheet>("SequenceGraph"));
-            SetupZoom(ContentZoomer.DefaultMinScale, ContentZoomer.DefaultMaxScale);
-            
-            this.AddManipulator(new ContentDragger());
-            this.AddManipulator(new SelectionDragger());
-            this.AddManipulator(new RectangleSelector());
-            
-            var grid = new GridBackground();
-            Insert(0, grid);
-            grid.StretchToParentSize();
-            
-            AddElement(GenerateEntryPoint());
-        }
-
-        public SequenceNode CreateSequenceNode(string nodeName)
-        {
-            var sequenceNode = new SequenceNode()
-            {
-                title = "Part",
-                Guid = GUID.Generate().ToString(),
-                content = "Wow more stuff"
-            };
-
-            var inputPort = GeneratePort(sequenceNode, Direction.Input, Port.Capacity.Multi);
-            inputPort.portName = "Input";
-            sequenceNode.inputContainer.Add(inputPort);
-            
-            var button = new Button(() =>
-            {
-                AddChoicePort(sequenceNode);
-            });
-            button.text = "New choice";
-            sequenceNode.titleContainer.Add(button);
-            
-            sequenceNode.RefreshExpandedState();
-            sequenceNode.RefreshPorts();
-            
-            sequenceNode.SetPosition(new Rect(Vector2.zero, defaultSize));
-            AddElement(sequenceNode);
-            
-            return sequenceNode;
-        }
+        //---[Utilities]------------------------------------------------------------------------------------------------/
 
         public override List<Port> GetCompatiblePorts(Port startPort, NodeAdapter nodeAdapter)
         {
             var compatiblePorts = new List<Port>();
-            ports.ForEach(port =>
-            {
-                if (startPort != port && startPort.node != port.node) compatiblePorts.Add(port);
-            });
+            ports.ForEach(port => { if (startPort != port && startPort.node != port.node) compatiblePorts.Add(port); });
 
             return compatiblePorts;
         }
-
-        private Port GeneratePort(SequenceNode node, Direction direction, Port.Capacity capacity = Port.Capacity.Single)
+        
+        private SerializedProperty GetPropertyFor(SequenceNode node)
         {
-            return node.InstantiatePort(Orientation.Horizontal, direction, capacity, typeof(float));
+            if (node.index == -1) return rootProperty.Copy();
+            else return arrayProperty.GetArrayElementAtIndex(node.index);
         }
         
-        private SequenceNode GenerateEntryPoint()
+        private void AddNode(SequenceNode node)
         {
-            var node = new SequenceNode()
-            {
-                title = "Start",
-                Guid = GUID.Generate().ToString(),
-                content = "Hello world!",
-                entryPoint = true
-            };
+            cachedNodes.Add(node);
+            AddElement(node);
+        }
+        private void RemoveNode(SequenceNode node)
+        {
+            arrayProperty.DeleteArrayElementAtIndex(node.index);
+            serializedObject.ApplyModifiedProperties();
 
-            var port = GeneratePort(node, Direction.Output);
-            port.portName = "Next";
-            node.outputContainer.Add(port);
-            
-            node.RefreshExpandedState();
-            node.RefreshPorts();
-            
-            node.SetPosition(new Rect(100, 200, 100, 150));
-            return node;
+            cachedNodes.Remove(node);
+            RemoveElement(node);
         }
 
-        private void AddChoicePort(SequenceNode node)
+        private void RemoveEdge(Edge edge)
         {
-            var port = GeneratePort(node, Direction.Output);
-            var outputCount = node.outputContainer.Query("connector").ToList().Count;
-            port.name = $"Choice - {outputCount}";
+            edge.input.Disconnect(edge);
+            edge.output.Disconnect(edge);
             
-            node.outputContainer.Add(port);
-                        
-            node.RefreshExpandedState();
-            node.RefreshPorts();
-        }*/
+            cachedEdges.Remove(edge);
+            RemoveElement(edge);
+        }
+        
+        //---[Callbacks]------------------------------------------------------------------------------------------------/
+        
+        GraphViewChange OnChange(GraphViewChange change)
+        {
+            if (change.edgesToCreate != null) foreach (var edge in change.edgesToCreate) cachedEdges.Add(edge);
+            return change;
+        }
+        void DeleteSelection(string operationName, AskUser askUser)
+        {
+            for (var i = 0; i < selection.Count; i++)
+            {
+                if (selection[i] is Edge removedEdge) RemoveEdge(removedEdge);
+                else if (selection[i] is SequenceNode sequenceNode)
+                {
+                    var matchingEdges = cachedEdges.Where(edge => edge.input.node == sequenceNode || edge.output.node == sequenceNode).ToArray();
+                    foreach (var edge in matchingEdges) RemoveEdge(edge);
+
+                    var index = sequenceNode.index;
+                    RemoveNode(sequenceNode);
+
+                    foreach (var node in cachedNodes) if (node.index > index) node.index--;
+                }
+            }
+        }
     }
 }
