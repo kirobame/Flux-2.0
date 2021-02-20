@@ -324,20 +324,15 @@ MonoBehaviour:
   m_GameObject: {fileID: 1030893180}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: de8222073adb07b4c9e770fb57695fd5, type: 3}
+  m_Script: {fileID: 11500000, guid: 6d783a18cb0eb7f469c3a21fc333ebc3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  root:
-    rect:
-      serializedVersion: 2
-      x: 0
-      y: 0
-      width: 73
-      height: 71
-    linkIndices: 
-  effects: []
-  references:
-    version: 1
+  curve:
+    serializedVersion: 2
+    m_Curve: []
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
 --- !u!4 &1030893182
 Transform:
   m_ObjectHideFlags: 0
@@ -364,7 +359,6 @@ GameObject:
   - component: {fileID: 1423584228}
   - component: {fileID: 1423584229}
   - component: {fileID: 1423584230}
-  - component: {fileID: 1423584231}
   m_Layer: 0
   m_Name: Object
   m_TagString: Untagged
@@ -504,16 +498,3 @@ MonoBehaviour:
           height: 99
         linkIndices: 
         name: LOOP
---- !u!114 &1423584231
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1423584226}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 6d783a18cb0eb7f469c3a21fc333ebc3, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  sequencer: {fileID: 1423584230}

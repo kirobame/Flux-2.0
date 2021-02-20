@@ -4,13 +4,15 @@ using System.Linq;
 using Flux;
 using UnityEngine;
 using UnityEngine.AddressableAssets;
+using UnityEngine.Timeline;
 
 public class SomeObject : MonoBehaviour
 {
-    [SerializeField] private Sequencer sequencer;
+    [SerializeField] private Timetable timetable;
+    [SerializeField] private AnimationCurve curve;
 
     void Update()
     {
-        if (Input.GetKeyDown(KeyCode.M)) sequencer.Play(EventArgs.Empty);
+        
     }
 }
