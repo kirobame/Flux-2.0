@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using Sirenix.OdinInspector.Editor;
 using UnityEditor;
 using UnityEditor.Experimental.GraphView;
 using UnityEditor.UIElements;
@@ -22,14 +23,32 @@ namespace Flux.Editor
             this.AddManipulator(new RectangleSelector());
             
             var grid = new GridBackground();
+            VisualElement borders = new IMGUIContainer(() =>
+            {
+                var rect = new Rect(Vector2.zero, window.position.size);
+                var thickness = 3.0f;
+                var color = "#383838".ToColor();
+                
+                EditorGUI.DrawRect(new Rect(Vector2.zero, new Vector2(rect.width, thickness)), color);
+                EditorGUI.DrawRect(new Rect(Vector2.zero, new Vector2(thickness, rect.height)), color);
+                EditorGUI.DrawRect(new Rect(new Vector2(rect.xMax - thickness, rect.yMin), new Vector2(thickness, rect.height)), color);
+                EditorGUI.DrawRect(new Rect(new Vector2(rect.xMin, rect.yMax - thickness), new Vector2(rect.width, thickness)), color);
+            });
+            grid.Add(borders);
+            
             Insert(0, grid);
             grid.StretchToParentSize();
 
             cachedNodes = new List<SequenceNode>();
             cachedEdges = new List<Edge>();
+
+            serializeGraphElements += SerializeNode;
+            canPasteSerializedData += CanPaste;
+            unserializeAndPaste += UnserializeAndPaste;
             
-            searchWindow = ScriptableObject.CreateInstance<NodeSearchWindow>();
-            searchWindow.Initialize(window, this);
+            searchWindow = ScriptableObject.CreateInstance<TypeSearchWindow>();
+            searchWindow.Initialize("Create node", typeof(Effect), window);
+            searchWindow.onSelectEntry += (val, pos) => AddNode((Type) val, contentViewContainer.WorldToLocal(pos));
             nodeCreationRequest += ctxt => SearchWindow.Open(new SearchWindowContext(ctxt.screenMousePosition), searchWindow);
             
             deleteSelection += DeleteSelection;
@@ -44,7 +63,7 @@ namespace Flux.Editor
         private SerializedProperty arrayProperty;
 
         private EditorWindow window;
-        private NodeSearchWindow searchWindow;
+        private TypeSearchWindow searchWindow;
 
         private List<SequenceNode> cachedNodes;
         private List<Edge> cachedEdges;
@@ -173,6 +192,29 @@ namespace Flux.Editor
             
             AddNode(node);
         }
+        private void CopyNode(int sourceIndex)
+        {
+            var sourceProperty = arrayProperty.GetArrayElementAtIndex(sourceIndex);
+            var subProperty = arrayProperty.NewElementAtEnd();
+
+            var nodeType = sourceProperty.GetEmbeddedType();
+            subProperty.managedReferenceValue = (Effect)Activator.CreateInstance(nodeType);
+            sourceProperty.CopyTo(subProperty);
+            
+            var copy = subProperty.Copy();
+            copy.Next(true);
+            
+            sourceProperty.Next(true);
+            var rect = sourceProperty.rectValue;
+            copy.rectValue = new Rect(rect.position + new Vector2(50, 50), rect.size);
+
+            serializedObject.ApplyModifiedProperties();
+            
+            var node = CreateNodeFrom(subProperty, serializedObject, nodeType.Name);
+            node.index = arrayProperty.arraySize - 1;
+            
+            AddNode(node);
+        }
         private SequenceNode CreateNodeFrom(SerializedProperty property, SerializedObject serializedObject, string overrideName = "", bool hasInput = true)
         {
             var copy = property.Copy();
@@ -268,6 +310,30 @@ namespace Flux.Editor
         }
         
         //---[Callbacks]------------------------------------------------------------------------------------------------/
+
+        string SerializeNode(IEnumerable<GraphElement> elements)
+        {
+            var data = string.Empty;
+            foreach (var element in elements)
+            {
+                if (!(element is SequenceNode node)) continue;
+                data += $"{node.index}/";
+            }
+
+            if (data != string.Empty) data = data.Substring(0, data.Length - 1);
+            return data;
+        }
+        bool CanPaste(string data) => data != string.Empty;
+        void UnserializeAndPaste(string operation, string data)
+        {
+            if (operation != "Paste" || serializedObject == null) return;
+
+            foreach (var subData in data.Split('/'))
+            {
+                var index = int.Parse(subData);
+                CopyNode(index);
+            }
+        }
         
         GraphViewChange OnChange(GraphViewChange change)
         {

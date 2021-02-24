@@ -4,6 +4,7 @@ using UnityEngine;
 
 namespace Flux
 {
+    [Serializable]
     public abstract class Jump : Effect
     {
         [SerializeField] private string target;

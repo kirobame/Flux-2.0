@@ -20,7 +20,7 @@ namespace Flux
         IEnumerable<int> IEffect.LinkIndices => linkIndices;
         [HideInInspector, SerializeField] private List<int> linkIndices = new List<int>();
 
-        void IEffect.Inject(Effect[] links) => this.links = links;
+        void IInjectable<Effect[]>.Inject(Effect[] links) => this.links = links;
         private Effect[] links;
         
         //---[Initializations]------------------------------------------------------------------------------------------/

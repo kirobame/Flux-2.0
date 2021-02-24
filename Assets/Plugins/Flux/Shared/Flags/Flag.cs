@@ -2,6 +2,7 @@
 
 namespace Flux
 {
+    [Serializable]
     public struct Flag : IFlag
     {
         public Flag(Enum value) => Value = value;

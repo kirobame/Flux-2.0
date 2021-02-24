@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace Flux
 {
-    [Path("Utilities")]
+    [Serializable, Path("Utilities")]
     public class Wait : Effect
     {
         [SerializeField] private float time;

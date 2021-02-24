@@ -45,8 +45,8 @@ namespace Flux.Editor
             rect.x -= left;
             rect.y -= up;
 
-            rect.width += right;
-            rect.height += down;
+            rect.width += right * 2.0f;
+            rect.height += down * 2.0f;
 
             return rect;
         }

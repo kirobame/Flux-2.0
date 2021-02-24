@@ -1,4 +1,5 @@
 ﻿using UnityEditor;
+using UnityEngine;
 using UnityEngine.UIElements;
 
 namespace Flux.Editor
@@ -59,6 +60,9 @@ namespace Flux.Editor
 
         void OnGUI()
         {
+            var rect = new Rect(Vector2.zero, position.size);
+            rect.DrawBorders(5.0f, Color.red);
+            
             if (hasBeenFramed) return;
 
             graphView.FrameAll();

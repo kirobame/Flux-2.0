@@ -3,6 +3,7 @@ using UnityEngine;
 
 namespace Flux
 {
+    [Serializable]
     public struct DynamicFlag : IFlag, IBootable
     {
         public Enum Value { get; private set; }

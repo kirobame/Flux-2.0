@@ -28,7 +28,7 @@ namespace Flux
                 lookups.Add(type, offset);
             }
 
-            return offset + value;
+            return int.MinValue + offset * 255 + value;
         }
         
         public void Reset() => lookups.Clear();

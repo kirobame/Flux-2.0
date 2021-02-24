@@ -2,9 +2,8 @@
 
 namespace Flux
 {
-    public interface IEffect
+    public interface IEffect : IInjectable<Effect[]>
     {
         IEnumerable<int> LinkIndices { get; }
-        void Inject(Effect[] links);
     }
 }

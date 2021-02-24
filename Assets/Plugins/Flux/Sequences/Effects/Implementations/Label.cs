@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace Flux
 {
-    [Path("Utilities")]
+    [Serializable, Path("Utilities")]
     public class Label : Effect
     {
         public string Name => name;
