@@ -9,8 +9,8 @@ namespace Flux
 {
     public class Entity : MonoBehaviour
     {
-        internal event Action<Entity, IData> onSectionAddition;
-        internal event Action<Entity, IData> onSectionRemoval;
+        internal event Action<Entity, IData> onDataAddition;
+        internal event Action<Entity, IData> onDataRemoval;
         
         internal event Action<Entity, Enum> onFlagAddition;
         internal event Action<Entity, Enum> onFlagRemoval;
@@ -44,7 +44,7 @@ namespace Flux
         void Awake()
         {
             var query = flags.Where(flag => flag is IBootable).Cast<IBootable>()
-                                                .Concat(table.Where(data => data is IBootable).Cast<IBootable>());
+                                             .Concat(table.Where(data => data is IBootable).Cast<IBootable>());
             
             foreach (var bootable in query) bootable.Bootup();
             
@@ -339,7 +339,7 @@ namespace Flux
             onFlagRemoval?.Invoke(this, flag);
         }
 
-        public void AddSection(IData data)
+        public void AddData(IData data)
         {
             var key = data.GetType();
             if (lookups.ContainsKey(key)) return;
@@ -349,7 +349,7 @@ namespace Flux
             table.Add(data);
             
             Entities.TryInjectComponentData(this, data);
-            onSectionAddition?.Invoke(this, data);
+            onDataAddition?.Invoke(this, data);
 
             for (var i = 0; i < count; i++)
             {
@@ -357,21 +357,25 @@ namespace Flux
                 lookups[key] = i;
             }
         }
-        public void RemoveSection<T>() where T : IData
+        public void RemoveData<T>() where T : IData
         {
             var key = typeof(T);
             if (!lookups.ContainsKey(key)) return;
-
-            var index = lookups[key];
-            onSectionRemoval?.Invoke(this, table[index]);
             
+            var index = lookups[key];
+            onDataRemoval?.Invoke(this, table[index]);
+        }
+        internal void Cleanup(Type type)
+        {
+            var index = lookups[type];
+
             table.RemoveAt(index);
-            lookups.Remove(key);
+            lookups.Remove(type);
             
             for (var i = index; i < table.Count; i++)
             {
-                key = table[i].GetType();
-                lookups[key] = i;
+                type = table[i].GetType();
+                lookups[type] = i;
             }
         }
         
@@ -390,7 +394,7 @@ namespace Flux
         public override int GetHashCode() => GetInstanceID();
         public override string ToString()
         {
-            var output = $"Entity : {GetHashCode()}\n";
+            var output = $"Entity : {GetHashCode()}/{name}\n";
             foreach (var section in table) output += $"---|{section}\n";
 
             return output;

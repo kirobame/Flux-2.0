@@ -1,0 +1,41 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bbb281ee3bf0b054c82ac2347e9e782c, type: 3}
+  m_Name: 01
+  m_EditorClassIdentifier: 
+  m_GroupName: 01
+  m_Data:
+    m_SerializedData: []
+  m_GUID: 104e1421886101445bf7522686de046a
+  m_SerializeEntries:
+  - m_GUID: 09555ea3eb5a221469b6f2d487ab04d2
+    m_Address: 01-Sad
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    m_MainAsset: {fileID: 2800000, guid: 09555ea3eb5a221469b6f2d487ab04d2, type: 3}
+    m_TargetAsset: {fileID: 2800000, guid: 09555ea3eb5a221469b6f2d487ab04d2, type: 3}
+  - m_GUID: 1ae940e3b233636458f6b15b030f80c2
+    m_Address: 01-Happy
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    m_MainAsset: {fileID: 2800000, guid: 1ae940e3b233636458f6b15b030f80c2, type: 3}
+    m_TargetAsset: {fileID: 2800000, guid: 1ae940e3b233636458f6b15b030f80c2, type: 3}
+  - m_GUID: c142010a9862f2345b8241cf4aa67a16
+    m_Address: 01-SpriteRenderer
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    m_MainAsset: {fileID: 2104851974159059629, guid: c142010a9862f2345b8241cf4aa67a16, type: 3}
+    m_TargetAsset: {fileID: 2104851974159059629, guid: c142010a9862f2345b8241cf4aa67a16, type: 3}
+  m_ReadOnly: 0
+  m_Settings: {fileID: 11400000, guid: f568f9ad16fa2a94199c54fb39a6560b, type: 2}
+  m_SchemaSet:
+    m_Schemas: []

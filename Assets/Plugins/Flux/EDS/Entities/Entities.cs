@@ -8,6 +8,31 @@ using UnityEngine.PlayerLoop;
 
 namespace Flux
 {
+    internal abstract class Command
+    {
+        public abstract void Execute();
+    }
+
+    internal class DataRemoval : Command
+    {
+        public DataRemoval(Entity target, Type dataType)
+        {
+            this.target = target;
+            this.dataType = dataType;
+        }
+        
+        private Entity target;
+        private Type dataType;
+
+        public override void Execute()
+        {
+            Entities.RemoveData(target, dataType);
+            target.Cleanup(dataType);
+        }
+
+        public override int GetHashCode() => target.GetInstanceID() * dataType.GetHashCode() / 2;
+    }
+    
     public static class Entities
     {
         #region Nested Types
@@ -66,6 +91,8 @@ namespace Flux
         private static Dictionary<int, HashSet<Entity>> flaggedValues;
 
         private static FlagTranslator flagTranslator;
+
+        private static HashSet<Command> commands;
         
         //---[Initialization methods]-----------------------------------------------------------------------------------/
         
@@ -76,25 +103,27 @@ namespace Flux
             bridgeLookups = new Dictionary<Type, Type[]>();
             dirtiedBridges = new Dictionary<Entity, Dictionary<Type, HashSet<Type>>>();
             
-            root = new SystemRouter();
-            
+            root = new UpdateRelay("Root");
+
             values = new Dictionary<Type, HashSet<Entity>>();
             flaggedValues = new Dictionary<int, HashSet<Entity>>();
             
             flagTranslator = new FlagTranslator();
+            
+            commands= new HashSet<Command>();
 
             var queuedRelays = new Dictionary<string, List<UpdateRelay>>();
             foreach (var assembly in AppDomain.CurrentDomain.GetAssemblies())
             {
                 foreach (var type in assembly.GetTypes())
                 {
-                    if (typeof(IBridge).IsAssignableFrom(type) && !type.IsInterface) RegisterBridgeType(type);
+                    if (typeof(ILink).IsAssignableFrom(type) && !type.IsInterface) RegisterBridgeType(type);
                     else if (typeof(System).IsAssignableFrom(type) && !type.IsAbstract) RegisterSystemType(type, queuedRelays);
                 }
             }
             
             root.Sort();
-            
+
             var loop = PlayerLoop.GetDefaultPlayerLoop();
             loop = loop.InsertAt<Update>(new PlayerLoopSystem {updateDelegate = Update, type = typeof(UpdateECS)});
             
@@ -109,7 +138,7 @@ namespace Flux
             var matches = new List<Type>();
             foreach (var interfaceType in type.GetInterfaces())
             {
-                if (!typeof(IBridge).IsAssignableFrom(interfaceType) || interfaceType == typeof(IBridge)) continue;
+                if (!typeof(ILink).IsAssignableFrom(interfaceType) || interfaceType == typeof(ILink)) continue;
                 
                 var bridgedType = interfaceType.GetGenericArguments()[0];
                 matches.Add(bridgedType);
@@ -122,36 +151,48 @@ namespace Flux
 
             if (matches.Any()) bridgeLookups.Add(type, matches.ToArray());
         }
+
         private static void RegisterSystemType(Type type, Dictionary<string, List<UpdateRelay>> queuedRelays)
         {
-            var updateOrder = type.GetCustomAttribute<UpdateOrderAttribute>();
-            if (updateOrder == null) updateOrder = new UpdateOrderAttribute("Root", "Any/Any");
-
-            var updateRelay = new SystemWrapper(type, updateOrder.After, updateOrder.Before);
-            if (!root.TryFind(updateOrder.Parent, out var parent))
+            string[] chain;
+            
+            var updateGroup = type.GetCustomAttribute<GroupAttribute>();
+            if (updateGroup != null)
             {
-                if (!queuedRelays.TryGetValue(updateOrder.Parent, out var relays))
-                {
-                    var list = new List<UpdateRelay>() { updateRelay };
-                    queuedRelays.Add(updateOrder.Parent, list);
-                }
-                else relays.Add(updateRelay);
+                chain = updateGroup.Path.Split('/');
+                root.Insert(out var group, chain);
+                
+                group.SetOrder(updateGroup.After, updateGroup.Before);
             }
-            else InsertUpdateRelay(parent, updateRelay, queuedRelays);
-        }
-        private static void InsertUpdateRelay(UpdateRelay parent, UpdateRelay value, IReadOnlyDictionary<string, List<UpdateRelay>> queuedRelays)
-        {
-            parent.Add(value);
-            if (!queuedRelays.TryGetValue(value.Name, out var relays)) return;
+            
+            var updateOrder = type.GetCustomAttribute<OrderAttribute>();
+            if (updateOrder == null)
+            {
+                var defaultRelay = new UpdateRelay(type.Name);
+                
+                defaultRelay.SetOrder("Any", "Any");
+                defaultRelay.Inject((System)Activator.CreateInstance(type));
+                
+                root.Add(defaultRelay);
+                return;
+            }
 
-            foreach (var relay in relays) InsertUpdateRelay(value, relay, queuedRelays);
+            chain = updateOrder.Path.Split('/');
+            root.Insert(out var relay, chain);
+
+            relay.SetOrder(updateOrder.After, updateOrder.Before);
+            relay.Inject((System)Activator.CreateInstance(type));
         }
-        
+
         //---[Core]-----------------------------------------------------------------------------------------------------/
         
         static void Update()
         {
             root.Update();
+            
+            #if UNITY_EDITOR
+            if (!Application.isPlaying) return;
+            #endif
             
             foreach (var kvp in dirtiedBridges)
             {
@@ -167,7 +208,11 @@ namespace Flux
                     subKvp.Value.Clear();
                 }
             }
+            
+            Sync();
         }
+
+        public static void Sync() => ExecuteCommands();
 
         #region ForEach
 
@@ -318,7 +363,12 @@ namespace Flux
         public static int TranslateFlag(Enum flag) => flagTranslator.Translate(flag);
         public static IEnumerable<Entity> Fetch(IEnumerable<Enum> flags, params Type[] types)
         {
-            var output = new HashSet<Entity>(values[types[0]]);
+            if (!values.TryGetValue(types[0], out var output))
+            {
+                output = new HashSet<Entity>();
+                return output;
+            }
+            output = new HashSet<Entity>(output);
 
             for (var i = 1; i < types.Length; i++)
             {
@@ -346,26 +396,26 @@ namespace Flux
 
         internal static void Register(Entity entity)
         {
-            foreach (var section in entity.Table) OnSectionAddition(entity, section);
+            foreach (var section in entity.Table) OnDataAddition(entity, section);
             foreach (var flag in entity.Flags) OnFlagAddition(entity, flag.Value);
             
-            entity.onSectionAddition += OnSectionAddition;
-            entity.onSectionRemoval += OnSectionRemoval;
+            entity.onDataAddition += OnDataAddition;
+            entity.onDataRemoval += OnDataRemoval;
             entity.onFlagAddition += OnFlagAddition;
             entity.onFlagRemoval += OnFlagRemoval;
         }
         internal static void Unregister(Entity entity)
         {
-            foreach (var section in entity.Table) OnSectionRemoval(entity, section);
+            foreach (var section in entity.Table) OnDataRemoval(entity, section);
             foreach (var flag in entity.Flags) OnFlagRemoval(entity, flag.Value);
             
-            entity.onSectionAddition -= OnSectionAddition;
-            entity.onSectionRemoval -= OnSectionRemoval;
+            entity.onDataAddition -= OnDataAddition;
+            entity.onDataRemoval -= OnDataRemoval;
             entity.onFlagAddition -= OnFlagAddition;
             entity.onFlagRemoval -= OnFlagRemoval;
         }
         
-        private static void OnSectionAddition(Entity entity, IData data)
+        private static void OnDataAddition(Entity entity, IData data)
         {
             var key = data.GetType();
             if (!values.TryGetValue(key, out var hashSet))
@@ -376,11 +426,13 @@ namespace Flux
 
             hashSet.Add(entity);
         }
-        private static void OnSectionRemoval(Entity entity, IData data) => values[data.GetType()].Remove(entity);
+        private static void OnDataRemoval(Entity entity, IData data) => commands.Add(new DataRemoval(entity, data.GetType()));
+        internal static void RemoveData(Entity entity, Type dataType) => values[dataType].Remove(entity);
         
         private static void OnFlagAddition(Entity entity, Enum flag)
         {
             var key = flagTranslator.Translate(flag);
+
             if (!flaggedValues.TryGetValue(key, out var hashSet))
             {
                 hashSet = new HashSet<Entity>();
@@ -405,20 +457,20 @@ namespace Flux
             }
         }
 
-        public static void MarkDirty<T1>(Entity entity, IBridge bridge)
+        public static void MarkDirty<T1>(Entity entity, ILink bridge)
             where T1 : Component
         {
             MarkDirty(entity, bridge, typeof(T1));
         }
     
-        public static void MarkDirty<T1,T2>(Entity entity, IBridge bridge)
+        public static void MarkDirty<T1,T2>(Entity entity, ILink bridge)
             where T1 : Component
             where T2 : Component
         {
             MarkDirty(entity, bridge, typeof(T1), typeof(T2));
         }
     
-        public static void MarkDirty<T1,T2 ,T3>(Entity entity, IBridge bridge)
+        public static void MarkDirty<T1,T2 ,T3>(Entity entity, ILink bridge)
             where T1 : Component
             where T2 : Component
             where T3 : Component
@@ -426,7 +478,7 @@ namespace Flux
             MarkDirty(entity, bridge, typeof(T1), typeof(T2), typeof(T3));
         }
 
-        private static void MarkDirty(Entity entity, IBridge bridge, params Type[] bridgedTypes)
+        private static void MarkDirty(Entity entity, ILink bridge, params Type[] bridgedTypes)
         {
             if (!dirtiedBridges.TryGetValue(entity, out var subDictionary))
             {
@@ -442,6 +494,16 @@ namespace Flux
             }
 
             foreach (var bridgedType in bridgedTypes) hashSet.Add(bridgedType);
+        }
+        
+        //---[Commands]-------------------------------------------------------------------------------------------------/
+        
+        private static void ExecuteCommands()
+        {
+            if (!commands.Any()) return;
+            
+            foreach(var command in commands) command.Execute();
+            commands.Clear();
         }
     }
 }

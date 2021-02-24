@@ -15,9 +15,9 @@ namespace Flux
 
         #endregion
 
-        protected override IList<Provider<Object, GenericPoolable>> Providers => providers;
+        protected override IList<Provider<Object,GenericPoolable>> Providers => providers;
         [SerializeField] private GenericProvider[] providers;
-        
+
         public T CastSingle<T>() where T : Object => (T)RequestSinglePoolable().Value;
         public T CastSingle<T>(GenericPoolable key) where T : Object => (T)RequestSinglePoolable(key).Value;
         

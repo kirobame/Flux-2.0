@@ -9,6 +9,9 @@ namespace Flux
     [Serializable]
     public class Timetable
     {
+        public event Action onEndReached;
+        public event Action onStartReached;
+
         public bool IsLooping { get; set; }
         public float Duration
         {
@@ -76,11 +79,15 @@ namespace Flux
             
             if (time > duration)
             {
+                onEndReached?.Invoke();
+                
                 if (IsLooping) this.time = time - duration;
                 else this.time = duration;
             }
             else if (time < 0.0f)
             {
+                onStartReached?.Invoke();
+                
                 if (IsLooping) this.time = duration + time;
                 else this.time = 0.0f;
             }

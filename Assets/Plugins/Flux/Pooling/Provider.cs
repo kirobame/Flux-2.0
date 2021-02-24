@@ -7,7 +7,7 @@ namespace Flux
     public abstract class Provider { }
     
     [Serializable]
-    public abstract class Provider<T, TPoolable> : Provider where TPoolable : Poolable<T>
+    public abstract class Provider<T,TPoolable> : Provider where TPoolable : Poolable<T>
     {
         public TPoolable Prefab => prefab;
         public int Count => count;

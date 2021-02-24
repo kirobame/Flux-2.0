@@ -44,7 +44,7 @@ namespace Flux
             }
         }
 
-        public void AddProvider(Provider<T,TPoolable> provider) => Providers.Add(provider);
+        public virtual void AddProvider(Provider<T, TPoolable> provider) { }
 
         public T RequestSingle() => RequestSinglePoolable().Value;
         public T RequestSingle(TPoolable key) => RequestSinglePoolable(key).Value;

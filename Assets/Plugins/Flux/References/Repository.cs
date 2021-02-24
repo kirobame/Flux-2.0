@@ -47,7 +47,7 @@ namespace Flux
             var key = flagTranslator.Translate(flag);
             values[key] = value;
         }
-        public static T Get<T>(Enum flag) => (T) GetRaw(flag);
+        public static T Get<T>(Enum flag) => (T)GetRaw(flag);
         public static object GetRaw(Enum flag)
         {
             var key = flagTranslator.Translate(flag);
@@ -80,6 +80,38 @@ namespace Flux
         {
             var key = flagTranslator.Translate(flag);
             return values.TryGetValue(key, out value);
+        }
+
+        public static T[] GetAll<T>(Enum flag)
+        {
+            if (TryGetList(flag, out var list))
+            {
+                var cast = new T[list.Count];
+                for (var i = 0; i < list.Count; i++) cast[i] = (T) list[i];
+
+                return cast;
+            }
+
+            return null;
+        }
+        public static bool TryGetAll<T>(Enum flag, out T[] values)
+        {
+            values = null;
+            
+            if (TryGetList(flag, out var list))
+            {
+                var cast = new T[list.Count];
+                for (var i = 0; i < list.Count; i++)
+                {
+                    if (!(list[i] is T castedValue)) return false;
+                    cast[i] = castedValue;
+                }
+
+                values = cast;
+                return true;
+            }
+
+            return false;
         }
 
         public static void SetAt(Enum flag, int index, object value)

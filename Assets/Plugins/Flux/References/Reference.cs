@@ -15,7 +15,9 @@ namespace Flux
         
         void Awake()
         {
+            flag.Bootup();
             cachedFlag = flag.Value;
+
             Repository.Register(Flag, Value);
         }
 

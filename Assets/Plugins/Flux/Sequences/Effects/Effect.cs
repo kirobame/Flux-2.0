@@ -42,9 +42,13 @@ namespace Flux
             if (!IsDone)
             {
                 OnUpdate(args);
-                return false;
+                
+                if (!IsDone) return false;
+                else return Relay();
             }
-            else
+            return Relay();
+
+            bool Relay()
             {
                 args = OnTraversed(args);
                 var hasFinished = true;

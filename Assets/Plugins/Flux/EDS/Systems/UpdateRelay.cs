@@ -3,76 +3,69 @@ using System.Collections.Generic;
 
 namespace Flux
 {
-    internal abstract class UpdateRelay : IComparable<UpdateRelay>
+    public class UpdateRelay : IComparable<UpdateRelay>
     {
+        public UpdateRelay(string name)
+        {
+            Name = name;
+            After = "Any";
+            Before = "Any";
+            
+            childs = new List<UpdateRelay>();
+        }
+        
+        //---[Data]-----------------------------------------------------------------------------------------------------/
+
         public string Name { get; protected set; }
         public string After { get; protected set; }
         public string Before { get; protected set; }
 
         public IReadOnlyList<UpdateRelay> Childs => childs;
         protected List<UpdateRelay> childs;
-        
-        //---[Core]-----------------------------------------------------------------------------------------------------/
 
-        public abstract void Initialize();
-        public abstract void Update();
+        private System system;
+        private bool hasSystem;
         
         //---[Utilities]------------------------------------------------------------------------------------------------/
-        
-        public int CompareTo(UpdateRelay wrapper)
-        {
-            if (After != "Any" && After == wrapper.Name) return 1;
-            else if (Before != "Any" && Before == wrapper.Name) return -1;
-            else return 0;
-        }
 
-        public void Add(UpdateRelay wrapper) => childs.Add(wrapper);
+        public void SetOrder(string after, string before)
+        {
+            After = after;
+            Before = before;
+        }
+        public void Inject(System system)
+        {
+            this.system = system;
+            hasSystem = true;
+        }
+        public void Add(UpdateRelay relay) => childs.Add(relay);
+
+        //---[Core]-----------------------------------------------------------------------------------------------------/
+
+        public void Initialize()
+        {
+            if (hasSystem) system.Initialize();
+            foreach (var child in childs) child.Initialize();
+        }
+        public void Update()
+        {
+            if (hasSystem && system.IsActive) system.Update();
+            foreach (var child in childs) child.Update();
+        }
+        
+        //---[Sorting]--------------------------------------------------------------------------------------------------/
+        
         public void Sort()
         {
             childs.Sort();
             foreach (var child in childs) child.Sort();
         }
-    }
-    
-    //---[Implementations]----------------------------------------------------------------------------------------------/
-    
-    internal class SystemRouter : UpdateRelay
-    {
-        public SystemRouter()
+        
+        int IComparable<UpdateRelay>.CompareTo(UpdateRelay relay)
         {
-            Name = "Root";
-            After = "Any";
-            Before = "Any";
-            
-            childs = new List<UpdateRelay>();
+            if (After != "Any" && After == relay.Name) return 1;
+            else if (Before != "Any" && Before == relay.Name) return -1;
+            else return 0;
         }
-
-        public override void Initialize() { foreach (var child in childs) child.Initialize(); }
-        public override void Update() { foreach (var child in childs) child.Update(); }
-    }
-    internal class SystemWrapper : UpdateRelay
-    {
-        public SystemWrapper(Type systemType, string after, string before)
-        {
-            Name = systemType.Name;
-            After = after;
-            Before = before;
-            
-            value = (System)Activator.CreateInstance(systemType);
-            childs = new List<UpdateRelay>();
-        }
-
-        private System value;
-
-        public override void Initialize()
-        {
-            value.Initialize();
-            foreach (var child in childs) child.Initialize();
-        } 
-        public override void Update()
-        {
-            if (value.IsActive) value.Update();
-            foreach (var child in childs) child.Update();
-        } 
     }
 }

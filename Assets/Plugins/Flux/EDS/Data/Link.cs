@@ -9,7 +9,31 @@ namespace Flux
     }
     public class Link<T> : Link where T : Component
     {
-        public override void ReceiveData(IData to, Component from) => ((IBridge<T>)to).ReceiveDataFrom((T)from);
-        public override void SendData(IData from, Component to) => ((IBridge<T>)from).SendDataTo((T)to);
+        public override void ReceiveData(IData to, Component from)
+        {
+            switch (to)
+            {
+                case IReader<T> reader :
+                    reader.ReceiveDataFrom((T)from);
+                    break;
+                
+                case IBridge<T> bridge :
+                    bridge.ReceiveDataFrom((T)from);
+                    break;
+            }
+        }
+        public override void SendData(IData from, Component to)
+        {
+            switch (from)
+            {
+                case IWriter<T> writer :
+                    writer.SendDataTo((T)to);
+                    break;
+                
+                case IBridge<T> bridge :
+                    bridge.SendDataTo((T)to);
+                    break;
+            }
+        }
     }
 }
