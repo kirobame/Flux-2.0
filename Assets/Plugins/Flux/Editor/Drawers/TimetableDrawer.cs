@@ -19,15 +19,27 @@ namespace Flux.Editor
             EditorGUI.LabelField(rect, label);
             
             var contentRect = rect.GetValueRect().Indent(2.0f);
-            var spacing = 4.0f;
+            var spacing = 2.0f;
 
             var copy = property.Copy();
             copy.Next(true);
             copy.Next(false);
-            var durationRect = new Rect(contentRect.position, new Vector2(contentRect.width * 0.675f - spacing, rect.height));
-            EditorGUI.PropertyField(durationRect, copy, GUIContent.none);
             
-            var buttonRect = new Rect(new Vector2(durationRect.xMax + spacing, rect.yMin), new Vector2(contentRect.width - durationRect.width - spacing, rect.height));
+            var durationRect = new Rect(contentRect.position, new Vector2(contentRect.width * 0.6f, rect.height));
+            var remainder = new Rect(new Vector2(durationRect.xMax, rect.yMin), new Vector2(contentRect.width - durationRect.width, rect.height)); 
+            durationRect = durationRect.Stretch(0.0f, -spacing, 0.0f, 0.0f);
+
+            var toggleWidth = EditorGUIUtility.singleLineHeight;
+            var loopingRect = new Rect(remainder.position, new Vector2(toggleWidth, rect.height));
+            
+            var buttonRect = new Rect(new Vector2(loopingRect.xMax, rect.yMin), new Vector2(remainder.width - toggleWidth, rect.height));
+            loopingRect = loopingRect.Stretch(0.0f, -spacing, 0.0f, 0.0f);
+            
+            EditorGUI.PropertyField(durationRect, copy, GUIContent.none);
+
+            copy.Next(false);
+            EditorGUI.PropertyField(loopingRect, copy, GUIContent.none);
+            
             if (GUI.Button(buttonRect, "Edit"))
             {
                 window = ScriptableObject.CreateInstance(typeof(TimetableEditor)) as TimetableEditor;

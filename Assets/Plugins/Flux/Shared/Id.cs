@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using UnityEngine;
 
 namespace Flux
@@ -6,10 +7,10 @@ namespace Flux
     [Serializable]
     public struct Id : IComparable<Id>
     {
-        public Id(string value)
+        public Id(params char[] chars)
         {
-            if (value.Length > 3) value = value.Substring(0, 3);
-            this.value = value;
+            if (chars.Length != 3) throw new InvalidDataException("An id can only contain 3 char!");
+            value = new string(chars);
         }
         
         [SerializeField] private string value;

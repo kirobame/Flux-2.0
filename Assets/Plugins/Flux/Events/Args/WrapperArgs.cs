@@ -2,11 +2,13 @@
 
 namespace Flux
 {
-    public class WrapperArgs<T1> : EventArgs
+    public class WrapperArgs<T1> : EventArgs, IWrapper<T1>
     {
         public WrapperArgs(T1 argOne) => ArgOne = argOne;
         
         public T1 ArgOne { get; private set; }
+
+        T1 IWrapper<T1>.Value => ArgOne;
     }
     public class WrapperArgs<T1,T2> : EventArgs
     {

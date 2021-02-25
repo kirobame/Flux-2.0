@@ -44,7 +44,7 @@ namespace Flux
         {
             if (isPlaying) isPlaying = !root.Update(args);
         }
-        
+
         public void Play(EventArgs args)
         {
             this.args = args;

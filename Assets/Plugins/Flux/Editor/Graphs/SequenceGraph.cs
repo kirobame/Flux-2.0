@@ -20,7 +20,7 @@ namespace Flux.Editor
             var window = GetWindow<SequenceGraph>();
             window.titleContent = EditorGUIUtility.TrTextContentWithIcon("Sequence", "SceneViewFx");
         }
-
+        
         void OnEnable()
         {
             graphView = new SequenceGraphView(this);

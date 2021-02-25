@@ -93,7 +93,7 @@ namespace Flux.Editor
             activeStyle = new GUIStyle("flow node 5") {alignment = TextAnchor.MiddleCenter, clipping = TextClipping.Clip};
             interactiveStyle = new GUIStyle("flow node 5 on") {alignment = TextAnchor.MiddleCenter, clipping = TextClipping.Clip};
             
-            activeSegmentIndex = 0;
+            activeSegmentIndex = -1;
             interactiveSegmentIndex = -1;
             
             searchWindow = ScriptableObject.CreateInstance<TypeSearchWindow>();

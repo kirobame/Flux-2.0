@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Reflection;
 using UnityEngine;
 using Object = UnityEngine.Object;
 
@@ -14,13 +15,16 @@ namespace Flux
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
         static void Bootup()
         {
-            var prefabObject = new GameObject("PoolableAudio") { hideFlags = HideFlags.HideAndDontSave };
+            var prefabObject = new GameObject("PoolableAudio") { hideFlags = HideFlags.HideInHierarchy };
             Object.DontDestroyOnLoad(prefabObject);
+            
             var audioSource = prefabObject.AddComponent<AudioSource>();
+            audioSource.playOnAwake = false;
+            
             prefab = prefabObject.AddComponent<PoolableAudio>();
             ((IInjectable<AudioSource>)prefab).Inject(audioSource);
             
-            var poolObject = new GameObject("AudioPool") {hideFlags = HideFlags.HideAndDontSave};
+            var poolObject = new GameObject("AudioPool") {hideFlags = HideFlags.HideInHierarchy};
             Object.DontDestroyOnLoad(poolObject);
             pool = poolObject.AddComponent<AudioPool>();
 
@@ -32,6 +36,8 @@ namespace Flux
         public static PoolableAudio Play(IAudioPackage package, EventArgs args)
         {
             var poolable = pool.RequestSinglePoolable();
+            Reset(poolable.Value);
+            
             package.AssignTo(poolable.Value, args);
             poolable.Value.Play();
 
@@ -53,6 +59,20 @@ namespace Flux
 
                 return group;
             }
+        }
+
+        private static void Reset(AudioSource source)
+        {
+            source.loop = false;
+            source.priority = 128;
+            source.panStereo = 0;
+            source.spatialBlend = 0;
+            source.reverbZoneMix = 1;
+            source.dopplerLevel = 1;
+            source.spread = 0;
+            source.rolloffMode = AudioRolloffMode.Logarithmic;
+            source.minDistance = 1;
+            source.maxDistance = 500;
         }
     }
 }

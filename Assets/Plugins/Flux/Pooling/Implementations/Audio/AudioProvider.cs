@@ -5,6 +5,6 @@ namespace Flux
     public class AudioProvider : Provider<AudioSource, PoolableAudio>
     {
         public AudioProvider() { }
-        public AudioProvider(PoolableAudio prefab) => this.prefab = prefab;
+        public AudioProvider(PoolableAudio prefab) => actualPrefab = prefab;
     }
 }

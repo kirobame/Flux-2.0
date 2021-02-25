@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -12,6 +13,9 @@ namespace Flux
     }
     public abstract class Pool<T,TPoolable> : Pool<T> where TPoolable : Poolable<T>
     {
+        public event Action onReady;
+        
+        public bool IsOperational { get; private set; }
         public IEnumerable<TPoolable> UsedInstances => usedInstances;
 
         protected abstract IList<Provider<T,TPoolable>> Providers { get; }
@@ -19,16 +23,45 @@ namespace Flux
         private Dictionary<TPoolable, Queue<TPoolable>> availableInstances = new Dictionary<TPoolable, Queue<TPoolable>>();
         private HashSet<TPoolable> usedInstances = new HashSet<TPoolable>();
 
+        private bool hasBeenBootedUp;
+        private byte readiness;
+        
         void Awake()
         {
-            foreach (var provider in Providers)
-            {
-                var queue = new Queue<TPoolable>(provider.Instances);
-                availableInstances.Add(provider.Prefab, queue);
-            }
-
-            StartCoroutine(BootupRoutine());
+            IsOperational = false;
+            foreach (var provider in Providers) PrepareProvider(provider);
         }
+
+        private void PrepareProvider(Provider<T, TPoolable> provider)
+        {
+            readiness++;
+                
+            provider.onLoaded += OnProviderReady;
+            provider.Bootup();
+        }
+        void OnProviderReady(Provider<T,TPoolable> source)
+        {
+            source.onLoaded -= OnProviderReady;
+
+            readiness--;
+            if (readiness == 0)
+            {
+                IsOperational = true;
+                onReady?.Invoke();
+
+                if (hasBeenBootedUp) return;
+                
+                foreach (var provider in Providers)
+                {
+                    var queue = new Queue<TPoolable>(provider.Instances);
+                    availableInstances.Add(provider.Prefab, queue);
+                }
+
+                hasBeenBootedUp = true;
+                StartCoroutine(BootupRoutine());
+            }
+        }
+        
         private IEnumerator BootupRoutine()
         {
             foreach (var availableInstance in availableInstances.SelectMany(kvp => kvp.Value))

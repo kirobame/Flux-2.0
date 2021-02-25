@@ -11,8 +11,7 @@ namespace Flux
     {
         public event Action onEndReached;
         public event Action onStartReached;
-
-        public bool IsLooping { get; set; }
+        
         public float Duration
         {
             get => duration;
@@ -25,6 +24,7 @@ namespace Flux
 
         [SerializeReference] private List<Segment> segments;
         [SerializeField] private float duration;
+        public bool isLooping;
         
         private Dictionary<Id, Pin> pins = new Dictionary<Id, Pin>();
         
@@ -81,14 +81,14 @@ namespace Flux
             {
                 onEndReached?.Invoke();
                 
-                if (IsLooping) this.time = time - duration;
+                if (isLooping) this.time = time - duration;
                 else this.time = duration;
             }
             else if (time < 0.0f)
             {
                 onStartReached?.Invoke();
                 
-                if (IsLooping) this.time = duration + time;
+                if (isLooping) this.time = duration + time;
                 else this.time = 0.0f;
             }
             else this.time = time;
