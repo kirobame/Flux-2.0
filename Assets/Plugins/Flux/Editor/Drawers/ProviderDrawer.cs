@@ -33,15 +33,54 @@ namespace Flux.Editor
 
             EditorGUI.BeginProperty(rect, new GUIContent("Prefab"), property);
             var type = property.type;
-            
             rect.height = EditorGUIUtility.singleLineHeight;
-
+            
+            //----------------------------------------------------------------------------------------------------------/
+            
             property.NextVisible(true);
-            EditorGUI.PropertyField(rect, property, new GUIContent("Prefab"));
+            var mode = property.boolValue;
 
-            var subCopy = property.Copy();
-            subCopy.Next(true);
-            var guid = subCopy.stringValue;
+            var guid = string.Empty;
+            var reference = (Component)null;
+            var hasValue = false;
+           
+            var splitRect = rect.Split();
+            if (mode)
+            {
+                GUI.enabled = false;
+                GUI.Toggle(splitRect.left, property.boolValue, new GUIContent("Direct"), "wordwrapminibutton");
+                GUI.enabled = true;
+                property.boolValue = !GUI.Toggle(splitRect.right, !property.boolValue, new GUIContent("Addressables"), "wordwrapminibutton");
+                
+                property.NextVisible(false);
+                property.NextVisible(false);
+                rect.y += rect.height + EditorGUIUtility.standardVerticalSpacing;
+                EditorGUI.PropertyField(rect, property, new GUIContent("Prefab"));
+
+                reference = property.objectReferenceValue as Component;
+                hasValue = reference != null;
+            }
+            else
+            {
+                property.boolValue = GUI.Toggle(splitRect.left, property.boolValue, new GUIContent("Direct"), "wordwrapminibutton");
+                GUI.enabled = false;
+                GUI.Toggle(splitRect.right, !property.boolValue, new GUIContent("Addressables"), "wordwrapminibutton");
+                GUI.enabled = true;
+                
+                property.NextVisible(false);
+                rect.y += rect.height + EditorGUIUtility.standardVerticalSpacing;
+                EditorGUI.PropertyField(rect, property, new GUIContent("Prefab"));
+                
+                var subCopy = property.Copy();
+                subCopy.Next(true);
+                
+                guid = subCopy.stringValue;
+                hasValue = guid != string.Empty;
+                
+                property.NextVisible(false);
+            }
+
+            //----------------------------------------------------------------------------------------------------------/
             
             rect.y += rect.height + EditorGUIUtility.standardVerticalSpacing;
             
@@ -58,11 +97,13 @@ namespace Flux.Editor
             
             EditorGUI.IntSlider(rect, property, 0, 100, countLabel);
             
+            //----------------------------------------------------------------------------------------------------------/
+            
             rect.y += rect.height + EditorGUIUtility.standardVerticalSpacing;
             rect.x += EditorGUI.indentLevel * 14f;
             rect.width -= EditorGUI.indentLevel * 14f;
 
-            GUI.enabled = guid != string.Empty;
+            GUI.enabled = hasValue;
             if (GUI.Button(rect, new GUIContent("Fill")))
             {
                 if (property.intValue == 0) copy.arraySize = 0;
@@ -79,9 +120,15 @@ namespace Flux.Editor
                     copy.arraySize = property.intValue;
                     for (var i = 0; i < copy.arraySize; i++)
                     {
-                        var path = AssetDatabase.GUIDToAssetPath(guid);
-                        var prefab = AssetDatabase.LoadAssetAtPath(path, poolableTypes[type]);
-                                                    
+                        Object prefab;
+                        
+                        if (mode) prefab = reference;
+                        else
+                        {
+                            var path = AssetDatabase.GUIDToAssetPath(guid);
+                            prefab = AssetDatabase.LoadAssetAtPath(path, poolableTypes[type]);
+                        }
+                        
                         var instance = (Component)PrefabUtility.InstantiatePrefab(prefab, component.transform);
                         instance.gameObject.SetActive(false);
 
@@ -96,6 +143,6 @@ namespace Flux.Editor
             
             EditorGUI.EndProperty();
         }
-        public override float GetPropertyHeight(SerializedProperty property, GUIContent label) => EditorGUIUtility.singleLineHeight * 3f + EditorGUIUtility.standardVerticalSpacing * 3f;
+        public override float GetPropertyHeight(SerializedProperty property, GUIContent label) => EditorGUIUtility.singleLineHeight * 4f + EditorGUIUtility.standardVerticalSpacing * 4f;
     }
 }

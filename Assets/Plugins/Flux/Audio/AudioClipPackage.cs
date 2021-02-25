@@ -4,7 +4,7 @@ using UnityEngine.Audio;
 
 namespace Flux
 {
-    [CreateAssetMenu(fileName = "NewAudioClipPackage", menuName = "Audio/Clip")]
+    [CreateAssetMenu(fileName = "NewAudioClipPackage", menuName = "Audio Packages/Clip", order = 215)]
     public class AudioClipPackage : AudioPackage, IInjectable<AudioClip>
     {
         [SerializeField] private AudioClip clip;

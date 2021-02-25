@@ -59,7 +59,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   lifeTime: 2
-  speedRange: {x: 2, y: 3.5}
+  speedRange: {x: 2, y: 10}
 --- !u!212 &4434691135086093614
 SpriteRenderer:
   m_ObjectHideFlags: 0

@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace Flux
 {
-    [CreateAssetMenu(fileName = "NewAudioClipPackage", menuName = "Audio/Maps/By id")]
+    [CreateAssetMenu(fileName = "NewAudioClipPackage", menuName = "Audio Packages/Maps/By id", order = 215)]
     public class AudioIdMap : AudioMap<Id>
     {
         #region Nested Types

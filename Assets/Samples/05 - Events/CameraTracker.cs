@@ -46,18 +46,16 @@ namespace Example05
         {
             if (!(args is WrapperArgs<Vector2> castedArgs)) return;
             
-            queue.Enqueue($"IMPLICIT : Player has moved of {GetPreciseDescription(castedArgs.ArgOne)}");
+            queue.Enqueue($"IMPLICIT : Player has moved");
         }
         void OnPlayerMoveCasted(WrapperArgs<Vector2> args)
         {
-            queue.Enqueue($"CAST : Player has moved of {GetPreciseDescription(args.ArgOne)}");
+            queue.Enqueue($"CAST : Player has moved");
         }
         void OnPlayerMoveExplicit(Vector2 delta)
         {
-            queue.Enqueue($"EXPLICIT : Player has moved of {GetPreciseDescription(delta)}");
+            queue.Enqueue($"EXPLICIT : Player has moved");
             camera.transform.Translate(delta);
         }
-
-        private string GetPreciseDescription(Vector2 value) => $"(x:{value.x}, y:{value.y})";
     }
 }

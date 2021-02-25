@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace Flux
 {
-    [CreateAssetMenu(fileName = "NewAudioClipPackage", menuName = "Audio/3d settings")]
+    [CreateAssetMenu(fileName = "NewAudioClipPackage", menuName = "Audio Packages/3d settings", order = 215)]
     public class SpatialAudioSettings : AudioPackage
     {
         [SerializeField, Range(0,1)] private float blend;

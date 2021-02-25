@@ -13,12 +13,14 @@ namespace Flux
     {
         public event Action<Provider<T, TPoolable>> onLoaded;
         
-        public TPoolable Prefab => actualPrefab;
+        public TPoolable Prefab => mode ? directRef : actualPrefab;
         public int Count => count;
 
         public IReadOnlyList<TPoolable> Instances => instances;
-            
-        [SerializeField] protected AssetReference prefab;
+        
+        [SerializeField] private bool mode;
+        [SerializeField] protected AssetReference Address;
+        [SerializeField] protected TPoolable directRef;
         [SerializeField] protected int count = 1;
         [SerializeField] protected TPoolable[] instances;
 
@@ -26,8 +28,12 @@ namespace Flux
 
         public void Bootup()
         {
-            var handle = prefab.LoadAssetAsync<GameObject>();
-            handle.Completed += OnAssetLoaded;
+            if (mode) onLoaded?.Invoke(this);
+            else
+            {
+                var handle = Address.LoadAssetAsync<GameObject>();
+                handle.Completed += OnAssetLoaded;
+            }
         }
 
         void OnAssetLoaded(AsyncOperationHandle<GameObject> handle)

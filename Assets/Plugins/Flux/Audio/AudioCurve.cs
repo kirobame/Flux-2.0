@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace Flux
 {
-    [CreateAssetMenu(fileName = "NewAudioClipPackage", menuName = "Audio/Curve")]
+    [CreateAssetMenu(fileName = "NewAudioClipPackage", menuName = "Audio Packages/Curve", order = 215)]
     public class AudioCurve : AudioPackage
     {
         [SerializeField] private AudioSourceCurveType type;
