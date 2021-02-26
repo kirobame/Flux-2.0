@@ -1,0 +1,13 @@
+---[CONTROLS]-------------------------------------------------------------------------------------------------------------------|
+Space : Change SpriteRenderer's sprite
+
+---[GOAL]-----------------------------------------------------------------------------------------------------------------------|
+Using the Addressables system has all of its benefits on the performance side of things. However, it also allows to think of
+your design choices in an asynchronous way which results in always safer code. 
+
+On top of that, the ability to not use direct referencing or the Asset references & pass directly by addresses to fetch data
+is a great way to decouple the data from the logic of the code. With a strong naming convention, addresses do not have be
+rewrote & there is no need any more to validate that scripts have their reference type data filled in. 
+
+---[INDICATION]-----------------------------------------------------------------------------------------------------------------|
+All of the content of this example is inside the Spawner.cs script.

@@ -12,6 +12,8 @@ namespace Example08
 
         private Coroutine routine;
         private Rect rect;
+        
+        //---[Initialization]-------------------------------------------------------------------------------------------/
 
         void Start()
         {
@@ -20,12 +22,14 @@ namespace Example08
             var max = camera.ViewportToWorldPoint(Vector2.one);
             var size = max - min;
             
-            rect = new Rect(min, size);
+            rect = new Rect(min, size); // Definition of the screen in world space
         }
+        
+        //---[Core]-----------------------------------------------------------------------------------------------------/
 
         void Update()
         {
-            if (routine == null && Input.GetKeyDown(KeyCode.Space))
+            if (routine == null && Input.GetKeyDown(KeyCode.Space)) // On spacebar press, place as many Flake as count 
             {
                 var pool = Repository.Get<GenericPool>(References.FlakePool);
                 if (!pool.IsOperational) return;
@@ -36,7 +40,7 @@ namespace Example08
 
         private IEnumerator Routine(GenericPool pool)
         {
-            var remainder = count;
+            var remainder = count; // Remaining number of Flake to place
             var state = true;
  
             while (state)
@@ -44,21 +48,21 @@ namespace Example08
                 var batch = Random.Range(spawnRange.x, spawnRange.y);
                 remainder -= batch;
 
-                if (remainder < 0)
+                if (remainder <= 0) // If going into zero or negative, break out of the loop after last execution
                 {
                     remainder = 0;
-                    batch -= remainder;
+                    batch -= remainder; // Correct the negative value
 
                     state = false;
                 }
 
                 for (var i = 0; i < batch; i++)
                 {
-                    var flake = pool.CastSingle<Flake>();
+                    var flake = pool.CastSingle<Flake>(); // A GenericPool allows to directly cast an Object request
                     flake.transform.position = new Vector2(Random.Range(rect.xMin, rect.xMax), rect.yMax);
                 }
                 
-                yield return new WaitForSeconds(Random.Range(delayRange.x, delayRange.y));
+                yield return new WaitForSeconds(Random.Range(delayRange.x, delayRange.y)); // Random wait for next placed batch
             }
 
             routine = null;

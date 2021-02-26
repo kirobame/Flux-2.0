@@ -3,11 +3,14 @@ using UnityEngine;
 
 namespace Example03
 {
+    // Simple utility class to toggle between addition & removal of a flag
     public class FlagHandler : MonoBehaviour
     {
         [SerializeField] private Entity entity;
 
         private bool state;
+        
+        //---[Core]-----------------------------------------------------------------------------------------------------/
         
         void Update()
         {

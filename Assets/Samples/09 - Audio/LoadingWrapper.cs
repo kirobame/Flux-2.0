@@ -3,6 +3,7 @@ using UnityEngine;
 
 namespace Example09
 {
+    // The loading process of AssetReferences can be partially automated for Q.O.L
     public abstract class LoadingWrapper : MonoBehaviour
     {
         protected Loader loader { get; private set; }

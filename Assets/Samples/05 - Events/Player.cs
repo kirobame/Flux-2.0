@@ -10,8 +10,8 @@ namespace Example05
         
         void Awake()
         {
-            Debug.Log("Player has spawned");
-            Events.Open(GameEvent.OnPlayerMove);
+            Debug.Log("Player has spawned"); // Attestation of the Player spawns, after the CameraTracker
+            Events.Open(GameEvent.OnPlayerMove); // Open the event, any early subscribers will catch up
         }
         
         void Update()
@@ -24,7 +24,8 @@ namespace Example05
                 
                 transform.Translate(delta);
                 
-                Events.ZipCall(GameEvent.OnPlayerMove, delta);
+                // Calling the event once the operation has been done
+                Events.ZipCall(GameEvent.OnPlayerMove, delta); // == Events.Call(GameEvent.OnPlayerMove, new WrapperArgs<Vector2>(delta));
             }
         }
     }

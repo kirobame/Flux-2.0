@@ -7,6 +7,7 @@ namespace Example05
     {
         [SerializeField] private string message;
 
+        // Callback to be called from a Listener
         public void Execute(EventArgs args) => Debug.Log(message);
     }
 }

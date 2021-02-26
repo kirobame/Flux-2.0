@@ -6,7 +6,7 @@ using UnityEngine;
 
 namespace Example06
 {
-    [Serializable, Path("Samples/05")]
+    [Serializable, Path("Samples/05")] // Specifies the creation path like a MenuItem once in the SequenceEditor
     public class Animation : Effect
     {
         [SerializeField] private Animator animator;
@@ -14,16 +14,21 @@ namespace Example06
         [SerializeField] private string outTag;
 
         private bool triggerActivated;
+        
+        //---[Core]-----------------------------------------------------------------------------------------------------/
 
         public override void Ready()
         {
             base.Ready();
-            triggerActivated = false;
+            triggerActivated = false; // Before each sequence execution, reset this state to execute the trigger only once
         }
 
+        
+        // Update is the first flow method to be called on an effect
+        // As long as IsDone is true, OnUpdate will be called each tick and all linked effects will not receive any flow
         protected override void OnUpdate(EventArgs args)
         {
-            if (!triggerActivated)
+            if (!triggerActivated) // Execute the trigger
             {
                 animator.SetTrigger(triggerName);
                 triggerActivated = true;
@@ -31,8 +36,8 @@ namespace Example06
                 return;
             }
 
-            var stateInfo = animator.GetCurrentAnimatorStateInfo(0);
-            if (stateInfo.IsTag(outTag)) IsDone = true;
+            var stateInfo = animator.GetCurrentAnimatorStateInfo(0); // Check if we have reached the given Out state
+            if (stateInfo.IsTag(outTag)) IsDone = true; // If so, release control from this effect & let the flow trickle down deeper
         }
     }
 
@@ -43,11 +48,14 @@ namespace Example06
         [SerializeField] private bool g;
         [SerializeField] private bool b;
         
-        protected override void OnUpdate(EventArgs args) => IsDone = true;
+        //---[Core]-----------------------------------------------------------------------------------------------------/
+        
+        protected override void OnUpdate(EventArgs args) => IsDone = true; // There is no need to block the flow with this effect
 
-        protected override EventArgs OnTraversed(EventArgs args)
+        // OnTraversed is called on an effect for every tick after its IsDone switches to true
+        protected override EventArgs OnTraversed(EventArgs args) // It only needs to modify the passed EventArgs
         {
-            if (args is IWrapper<float> wrapper)
+            if (args is IWrapper<float> wrapper) // If possible convert a float into a color
             {
                 var i = wrapper.Value;
                 var color = new Color(r ? i : 0.0f, g ? i : 0.0f, b ? i : 0.0f, 1.0f);
@@ -66,29 +74,30 @@ namespace Example06
 
         private float time;
         private Color startColor;
+        
+        //---[Core]-----------------------------------------------------------------------------------------------------/
 
         public override void Ready()
         {
             base.Ready();
 
-            time = duration;
+            time = duration; // Reset countdown & fetch the starting color for Color.Lerp();
             startColor = renderer.material.GetColor("_Color");
         }
 
         protected override void OnUpdate(EventArgs args)
         {
-            if (args is WrapperArgs<Color> castedArgs)
+            if (args is IWrapper<Color> castedArgs) // If possible lerp the color of the targeted renderer
             {
                 time -= Time.deltaTime;
 
-                var endColor = castedArgs.ArgOne;
+                var endColor = castedArgs.Value;
                 var ratio = 1.0f - time / duration;
                 renderer.material.SetColor("_Color", Color.Lerp(startColor, endColor, ratio));
 
                 if (time < 0) IsDone = true;
             }
             else IsDone = true;
-
         }
     }
 }

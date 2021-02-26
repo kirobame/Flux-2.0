@@ -9,7 +9,7 @@ namespace Example08
     {
         #region Nested Types
 
-        [Serializable]
+        [Serializable] // Any custom pool must define a provider, simply implementing the base class is enough
         private class VfxProvider : Provider<ParticleSystem,PoolableVfx> { }
 
         #endregion

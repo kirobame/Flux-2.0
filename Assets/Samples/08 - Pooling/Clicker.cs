@@ -13,6 +13,8 @@ namespace Example08
         private bool hasLoaded;
         private PoolableVfx leftVfxKey;
         private PoolableVfx rightVfxKey;
+        
+        //---[Initialization]-------------------------------------------------------------------------------------------/
 
         void Awake()
         {
@@ -28,8 +30,10 @@ namespace Example08
             leftVfxKey = ((GameObject)values[0]).GetComponent<PoolableVfx>();
             rightVfxKey = ((GameObject)values[1]).GetComponent<PoolableVfx>();
 
-            hasLoaded = true;
+            hasLoaded = true; // Only allow the execution of logic once all references have been loaded
         }
+        
+        //---[Core]-----------------------------------------------------------------------------------------------------/
 
         void Update()
         {
@@ -41,16 +45,23 @@ namespace Example08
 
         private void SpawnVfx(PoolableVfx key)
         {
-            var pool = Repository.Get<VfxPool>(References.VfxPool);
+            // Fetches the pool & return if it is not ready
+            // A pool might be not operational because it references its Provider with the Addressables system
+            var pool = Repository.Get<VfxPool>(References.VfxPool); 
             if (!pool.IsOperational) return;
             
+            // Fetch the camera & convert the mouse position into worldspace
             var camera = Repository.Get<Camera>(References.Camera);
             var point = camera.ScreenToWorldPoint(Input.mousePosition);
             point.z = transform.position.z;
             
+            // Request a specific Vfx by giving a prefab key
+            // If the pool has already in store disabled instances of this key, it can give it right away
+            // If there are no disabled instance, an instantiation is made added to the pool & returned
+            // Otherwise the key does not exist for the moment & its added to the pool for later use
             var vfx = pool.RequestSingle(key);
             vfx.transform.position = point;
-            vfx.Play();
+            vfx.Play(); // Lifetime of the vfx is encapsulated in the PoolableVfx class and does not has to be done here
         }
     }
 }

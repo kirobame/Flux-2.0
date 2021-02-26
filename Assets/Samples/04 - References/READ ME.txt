@@ -1,0 +1,19 @@
+---[CONTROLS]-------------------------------------------------------------------------------------------------------------------|
+Spacebar : changes the color of all spheres to Handler.color
+P : Modifies the message of Remote.SomeData.message by Handler.message
+InputField : After edition, updates the title 
+
+---[GOAL]-----------------------------------------------------------------------------------------------------------------------|
+Allow the decoupling of data & logic by giving a simple & trusty reference system based on enums as addresses/key.
+
+No data injection has to be done if a prefab is instantiated into a scene without having a reference to one key component already
+present.
+
+---[INDICATION]-----------------------------------------------------------------------------------------------------------------|
+The main logic can be found in Handler.cs
+
+Referencer handle the referencing for :
+---| Name.Spheres on the GameObject - Spheres
+---| Name.Title on the GameObject -Canvas/Title
+
+> Name.Link is handled by the Remote class on the Remote GameObject

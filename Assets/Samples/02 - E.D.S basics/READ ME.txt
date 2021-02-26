@@ -1,0 +1,12 @@
+---[GOAL]-----------------------------------------------------------------------------------------------------------------------|
+The E.D.S system : .Entities .Data .Systems, Components was already taken by Unity and confusion between the two is better avoided,
+allows to have a workflow similar to D.O.T.S while keeping things more simple, stable & only single threaded.
+
+The main difference with D.O.T.S is the ability to work in hybrid seamlessly with the rest of Unity. Transforms, MeshRenders are
+still used to affect what's going on in the scene, you can just also modify them through linked data exising in the Entities system
+
+---[INDICATION]-----------------------------------------------------------------------------------------------------------------|
+All data types can be found in Data.cs
+All system types can be found in Systems.cs
+
+The different cubes object indicate by which systems they are affected. 

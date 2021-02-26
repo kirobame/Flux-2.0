@@ -1,0 +1,16 @@
+---[CONTROLS]-------------------------------------------------------------------------------------------------------------------|
+WASD or Arrow keys : Move the character
+
+---[GOAL]-----------------------------------------------------------------------------------------------------------------------|
+The Events system allows to avoid fetching data & caching it to maintain delegate callbacks towards specific objects like the 
+player character. It is aimed to be error free as much as it can be.
+
+Do note that this system should not replace local instance delegates if you're only interested by the instance. an Enemy.onDeath<Enemy> 
+is always better than a global OnEnemyDeath(Enemy enemy) which you would receive for every dead enemy instead of the only you're interested in. 
+
+---[INDICATION]-----------------------------------------------------------------------------------------------------------------|
+The main logic is inside Player.cs && CameraTracker.cs
+
+CameraTracker is instantiated first but wants to listen to a player event. 
+Its callback will be activated only when the player spawns. The Printer does not face this as it spawns after the player. 
+In any case, you do not have to worry about subscription order.

@@ -4,6 +4,7 @@ using UnityEngine;
 
 namespace Flux
 {
+    /// <summary><c>ScriptableObject</c> wrapper class to map a key Type onto <c>IAudioPackage</c> values</summary>
     public abstract class AudioMap<TKey> : AudioPackage
     {
         public AudioPackage this[TKey key] => packages[key];
@@ -13,9 +14,11 @@ namespace Flux
 
         private bool hasBeenBootedUp;
 
+        //---[Lifetime handling]----------------------------------------------------------------------------------------/
+        
         void OnDisable() => hasBeenBootedUp = false;
 
-        private void BootUp()
+        private void BootUp() // Translation of the KeyValuePair array into a dictionary
         {
             packages = new Dictionary<TKey, AudioPackage>();
             foreach (var keyValuePair in keyValuePairs)
@@ -25,12 +28,14 @@ namespace Flux
                 packages.Add(keyValuePair.Key, keyValuePair.Value);
             }
         }
+        
+        //---[Core]-----------------------------------------------------------------------------------------------------/
 
         public override void AssignTo(AudioSource source, EventArgs inArgs)
         {
-            if (!(inArgs is WrapperArgs<TKey> keyArgs)) return;
+            if (!(inArgs is WrapperArgs<TKey> keyArgs)) return; // If no key was passed, do nothing
             
-            if (!hasBeenBootedUp)
+            if (!hasBeenBootedUp) // If the dictionary hasn't been initialized, do so only once
             {
                 BootUp();
                 hasBeenBootedUp = true;
@@ -41,7 +46,7 @@ namespace Flux
         
         public bool TryGet(TKey key, out AudioPackage value)
         {
-            if (!hasBeenBootedUp)
+            if (!hasBeenBootedUp) // No specific initialization entry points exists, all entry points must be covered
             {
                 BootUp();
                 hasBeenBootedUp = true;

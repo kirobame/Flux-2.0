@@ -1,0 +1,14 @@
+---[CONTROLS]-------------------------------------------------------------------------------------------------------------------|
+WASD or Arrow keys : Move the player character
+
+---[GOAL]-----------------------------------------------------------------------------------------------------------------------|
+The Timetable class allows to create a work environment for any Lerp related behaviour through segments.
+A segment represents the combination of a time range between 0-1 & an AnimationCurve. The Timetable applies a global duration on 
+the local range of each segment. A segment with a range of 0-0.25 will only be called between 0 & 2.5seconds for a global time of 10seconds
+
+The use of animation curves gives more flexibity for the final look of the effects.
+
+---[INDICATION]-----------------------------------------------------------------------------------------------------------------|
+The main logic is inside Player.cs
+
+The TimetableEditor can be opened through the "Edit" button next to the corresponding value on the Player Component

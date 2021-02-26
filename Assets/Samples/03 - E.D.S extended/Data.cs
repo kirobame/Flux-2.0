@@ -7,9 +7,10 @@ namespace Example03
 {
     public struct Advance : IBridge<Transform>
     {
-        public float value;
-        public int step;
-        public bool isLocked;
+        public float value; // == Transform.position.x
+        public int step; // The number of times the Character will run for one single call
+        
+        public bool isLocked; // Supplementary data to showcase System Update group & order
 
         public void ReceiveDataFrom(Transform component) => value = component.position.x;
         public void SendDataTo(Transform component)

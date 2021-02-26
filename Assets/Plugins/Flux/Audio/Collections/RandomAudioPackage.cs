@@ -4,6 +4,7 @@ using Random = UnityEngine.Random;
 
 namespace Flux
 {
+    /// <summary>Picks a random <c>IAudioPackage</c> for execution.</summary>
     public class RandomAudioPackage : AudioCollectionPackage
     {
         public override void AssignTo(AudioSource source, EventArgs args)

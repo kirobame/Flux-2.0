@@ -3,7 +3,8 @@ using UnityEngine.ResourceManagement.AsyncOperations;
 
 namespace Flux
 {
-    public struct LoadedValue : IComparable<LoadedValue>
+    /// <summary>Wrapper holding a loading <c>AsyncOperationHandle</c>.</summary>
+    internal struct LoadedValue : IComparable<LoadedValue>
     {
         public LoadedValue(byte index, AsyncOperationHandle handle)
         {
@@ -11,13 +12,20 @@ namespace Flux
             this.handle = handle;
         }
         
-        public byte Index { get; private set; }
+        //---[Data]-----------------------------------------------------------------------------------------------------/
+        
+        /// <summary>Sorting value.</summary>
+        public byte Index { get; private set; } 
 
-        private AsyncOperationHandle handle;
+        private AsyncOperationHandle handle; 
+        
+        //---[Getters]--------------------------------------------------------------------------------------------------/
         
         public T Get<T>() => (T)handle.Result;
         public object GetRaw() => handle.Result;
 
+        //---[Sorting]--------------------------------------------------------------------------------------------------/
+        
         int IComparable<LoadedValue>.CompareTo(LoadedValue other) => Index.CompareTo(other.Index);
     }
 }

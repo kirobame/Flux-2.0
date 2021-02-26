@@ -1,0 +1,13 @@
+---[GOAL]-----------------------------------------------------------------------------------------------------------------------|
+The sequence systems provides a way to create chains of feedback in an easy and understandable way through a node graph.
+Each node represents an effect which defines an Update & Traversal behaviour. 
+
+The use of EventArgs abstract the explicit type of the passed data to the sequence and allows to have data trickle down the 
+sequence once its useful or can be changed into another type of data that will come in handy
+
+---[INDICATION]-----------------------------------------------------------------------------------------------------------------|
+The SequencEditor can be opened through the button "Edit" on a Seqeuencer component or via the Tools/Flux/Sequence tab.
+
+In this case the passed CustomArgs is intereted in two ways :
+---| As a IWrapper<float> for the ChannelFill effect allowing the execution of ChangeColor
+---| As a ISendback for the End effect which signals the end of the feedback

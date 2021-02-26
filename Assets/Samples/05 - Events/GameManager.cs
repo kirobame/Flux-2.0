@@ -13,12 +13,12 @@ namespace Example05
         
         void Awake()
         {
-            StartCoroutine(Routines.DoAfter(() =>
+            StartCoroutine(Routines.DoAfter(() => // Spawn the Player after 0.75seconds & spawn the Printer after that
             {
                 var handle = playerPrefab.InstantiateAsync(spawnAnchor.position, spawnAnchor.rotation);
                 handle.Completed += completedHandle => printerPrefab.InstantiateAsync();
                 
-            }, new YieldTime(0.75f)));
+            }, new YieldTime(0.75f))); // A yield instruction encapsulates a yield return statement
         }
     }
 }

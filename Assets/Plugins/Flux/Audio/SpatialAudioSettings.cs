@@ -3,6 +3,7 @@ using UnityEngine;
 
 namespace Flux
 {
+    /// <summary>Basic pasting of 3d spatial settings onto an <c>AudioSource</c>.</summary>
     [CreateAssetMenu(fileName = "NewAudioClipPackage", menuName = "Audio Packages/3d settings", order = 215)]
     public class SpatialAudioSettings : AudioPackage
     {

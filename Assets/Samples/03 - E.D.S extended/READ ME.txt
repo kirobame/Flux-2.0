@@ -1,0 +1,16 @@
+---[CONTROLS]-------------------------------------------------------------------------------------------------------------------|
+Spacebar : Makes all eligible Character to run the number of steps they can
+P : Toggles between the ability or not to run for Character<B>
+
+---[GOAL]-----------------------------------------------------------------------------------------------------------------------|
+One of the concern handled by the E.D.S system is to allow to precise queries with flags without having to create empty structs like
+in D.O.T.S. For this enums are used.
+
+On top of that, the principle of Update groups & orders is also found to allow more tuning on different steps of the game logic
+
+---[INDICATION]-----------------------------------------------------------------------------------------------------------------|
+All data types can be found in Data.cs
+All system types can be found in Systems.cs
+
+Flags can be precised in the Inspector with the DynamicFlag type which allows to set an enum value for a specific enum type.
+The Settings ScriptableObject specifies the distance traversed horizontally in one step.

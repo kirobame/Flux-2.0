@@ -1,0 +1,13 @@
+---[CONTROLS]-------------------------------------------------------------------------------------------------------------------|
+Left-click : play leftSound
+Right-click : play rightSound
+
+---[GOAL]-----------------------------------------------------------------------------------------------------------------------|
+The Audio system aims to delegate alot of the hustle of setting up audio (e.g : all the settings of an AudioSource) to the 
+implementations of the IAudioPackage. By creating ScriptableObject implementations and having useful utilities :
+---| Audio.Play();
+---| Audio.Combine();
+Playing audio becomes easier.
+
+---[INDICATION]-----------------------------------------------------------------------------------------------------------------|
+All of the logic is inside Player.cs

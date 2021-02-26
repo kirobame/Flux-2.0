@@ -3,6 +3,7 @@ using UnityEngine;
 
 namespace Flux
 {
+    /// <summary>Basic implementation of <c>AudioMap</c>.</summary>
     [CreateAssetMenu(fileName = "NewAudioClipPackage", menuName = "Audio Packages/Maps/By id", order = 215)]
     public class AudioIdMap : AudioMap<Id>
     {

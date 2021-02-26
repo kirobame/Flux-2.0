@@ -1,0 +1,12 @@
+---[CONTROLS]-------------------------------------------------------------------------------------------------------------------|
+Left-click : spawn leftVfx
+Right-click : spawn rightVfx
+Spacebar : spawns flakes going down from the top of the screen
+
+---[GOAL]-----------------------------------------------------------------------------------------------------------------------|
+The pooling system aims to give a robust automatization of the pooling process to be able to ask for any kind of instance in one line 
+of code. It supports both Direct and Address referencing to be flexible based on the user workflow.
+
+---[INDICATION]-----------------------------------------------------------------------------------------------------------------|
+Main logic inside Clicker.cs -> Usage of a custom user pool : VfxPool
+Auxiliary logic inside Background.cs & Flake.cs -> Usage of the given GenericPool

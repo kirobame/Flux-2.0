@@ -5,6 +5,7 @@ using UnityEngine.ResourceManagement.AsyncOperations;
 
 namespace Flux
 {
+    /// <summary>Utility class used to merge <c>AsyncOperationHandle</c> callbacks into one.</summary>
     public class Loader
     {
         public Loader()
@@ -12,12 +13,20 @@ namespace Flux
             values = new List<LoadedValue>();
             count = 0;
         }
-
+        
+        //---[Events]---------------------------------------------------------------------------------------------------/
+        
+        /// <summary>Called when all registered <c>AsyncOperationHandle</c> are completed.
+        /// Returns a list of all the results of each registered handle sorted by their associated <c>byte</c> index.</summary>
         public event Action<object[]> onDone;
 
-        private List<LoadedValue> values;
+        private List<LoadedValue> values; // Handles are registered into a list for the innate sorting capacities of the container
         private int count;
         
+        //---[Methods]--------------------------------------------------------------------------------------------------/
+        
+        /// <summary>Adds a dependency onto the given <c>AsyncOperationHandle</c>'s completed callback.</summary>
+        /// <param name="index">Sorting value.</param>
         public void Register(byte index, AsyncOperationHandle handle)
         {
             count++;
@@ -29,7 +38,7 @@ namespace Flux
         void OnHandleCompletion(AsyncOperationHandle handle)
         {
             count--;
-            if (count <= 0)
+            if (count <= 0) // If all of the handles are completed, begin value listing & merged callback
             {
                 values.Sort();
                 

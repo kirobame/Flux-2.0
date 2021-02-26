@@ -5,7 +5,7 @@ namespace Example08
 {
     public class PoolableVfx : Poolable<ParticleSystem>
     {
-        void Update()
+        void Update() // Lifetime handling
         {
             if (!Value.isPlaying) gameObject.SetActive(false);
         }

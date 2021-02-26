@@ -13,18 +13,34 @@ namespace Example05
         
         private Queue<string> queue;
         
+        //---[Lifetime handling]----------------------------------------------------------------------------------------/
+        
         void Awake()
         {
             queue = new Queue<string>();
-            Debug.Log("Camera tracker is active");
+            Debug.Log("Camera tracker is active"); // Attestation of the CameraTracker initialization, before the Player
             
-            Events.RelayByVoid(GameEvent.OnPlayerMove, OnPlayerMoveArgless);
-            Events.Register(GameEvent.OnPlayerMove, OnPlayerMove);
-            Events.RelayByCast<WrapperArgs<Vector2>>(GameEvent.OnPlayerMove, OnPlayerMoveCasted);
-            Events.RelayByValue<Vector2>(GameEvent.OnPlayerMove, OnPlayerMoveExplicit);
+            // Subscription to the Player event before its instantiation is not a problem
+            // Many overloads exists to ease standard processes like simply passing data or specific EventArgs
+            Events.RelayByVoid(GameEvent.OnPlayerMove, OnPlayerMoveArgless); // Passes nothing
+            Events.Register(GameEvent.OnPlayerMove, OnPlayerMove); // Standard subscription
+            Events.RelayByCast<WrapperArgs<Vector2>>(GameEvent.OnPlayerMove, OnPlayerMoveCasted); // Casts implicitly the received EventArgs
+            Events.RelayByValue<Vector2>(GameEvent.OnPlayerMove, OnPlayerMoveExplicit); // Directly passes a value if possible
         }
+        
+        void OnDestroy() // Like regular delegates, unsubscription must be based on logic AND lifetime!
+        {
+            Events.BreakVoidRelay(GameEvent.OnPlayerMove, OnPlayerMoveArgless);
+            Events.Unregister(GameEvent.OnPlayerMove, OnPlayerMove);
+            Events.BreakCastRelay<WrapperArgs<Vector2>>(GameEvent.OnPlayerMove, OnPlayerMoveCasted);
+            Events.BreakValueRelay<Vector2>(GameEvent.OnPlayerMove, OnPlayerMoveExplicit);
+            
+            // Alternatively, you can wipe the current event addresses with Events.Clear();
+        }
+        
+        //---[Core]-----------------------------------------------------------------------------------------------------/
 
-        void Update()
+        void Update() // Prints all received callback declared in Awake
         {
             if (!queue.Any()) return;
 
@@ -37,6 +53,8 @@ namespace Example05
             
             Debug.Log(builder);
         }
+        
+        //---[Callbacks]------------------------------------------------------------------------------------------------/
 
         void OnPlayerMoveArgless()
         {
