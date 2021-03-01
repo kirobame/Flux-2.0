@@ -1,0 +1,15 @@
+{
+    "name": "Flux.Feedbacks",
+    "references": [
+        "GUID:e299517f675550643bb2fef708da51a6"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

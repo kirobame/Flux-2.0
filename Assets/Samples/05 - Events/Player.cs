@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using Flux;
+using Flux.Event;
 using UnityEngine;
 
 namespace Example05

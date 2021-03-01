@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using Flux;
+using Flux.Data;
 using UnityEngine;
 
 namespace Example08

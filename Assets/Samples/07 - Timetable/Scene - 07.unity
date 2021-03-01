@@ -389,7 +389,7 @@ MonoBehaviour:
     segments:
     - id: 0
     - id: 1
-    duration: 0.75
+    duration: 0.7
     isLooping: 1
   speed: 3
   references:
@@ -432,10 +432,10 @@ MonoBehaviour:
           m_PostInfinity: 2
           m_RotationOrder: 4
         renderer: {fileID: 148800706}
-        start: {r: 0.9150943, g: 0.54561496, b: 0.25467247, a: 1}
-        end: {r: 0.31772873, g: 0.6687772, b: 0.7924528, a: 1}
+        start: {r: 0.45256317, g: 0.65760255, b: 0.8490566, a: 1}
+        end: {r: 0.8679245, g: 0.52671164, b: 0.30704877, a: 1}
     00000001:
-      type: {class: FloatOutput, ns: Flux, asm: Assembly-CSharp-firstpass}
+      type: {class: FloatOutput, ns: Flux.Feedbacks, asm: Flux.Feedbacks}
       data:
         span: {x: 0, y: 1}
         curve:
@@ -473,8 +473,8 @@ MonoBehaviour:
           m_RotationOrder: 4
         pin:
           value: HGT
-        start: 0.5
-        end: 1
+        start: 0.75
+        end: 1.25
 --- !u!1 &1155056422
 GameObject:
   m_ObjectHideFlags: 0

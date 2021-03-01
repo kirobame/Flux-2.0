@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using Flux;
+using Flux.Feedbacks;
 using UnityEngine;
 
 namespace Example07

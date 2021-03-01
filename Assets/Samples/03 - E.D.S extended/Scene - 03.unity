@@ -658,6 +658,7 @@ MonoBehaviour:
       data:
         value: 0
         step: 2
+        isLocked: 0
 --- !u!114 &1514399003
 MonoBehaviour:
   m_ObjectHideFlags: 0

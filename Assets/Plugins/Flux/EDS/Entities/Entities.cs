@@ -6,10 +6,57 @@ using UnityEngine;
 using UnityEngine.LowLevel;
 using UnityEngine.PlayerLoop;
 
-namespace Flux
+namespace Flux.EDS
 {
     public static class Entities
     {
+        private static bool Insert(this UpdateRelay parent, out UpdateRelay output, string[] chain, int index = 0)
+        {
+            if (index == chain.Length)
+            {
+                output = null;
+                return false;
+            }
+
+            output = parent.Childs.FirstOrDefault(child => child.Name == chain[index]);
+            if (output == null)
+            {
+                output = new UpdateRelay(chain[index]);
+                parent.Add(output);
+            }
+
+            if (Insert(output, out var subOutput, chain, index + 1)) output = subOutput;
+            return true;
+        }
+        private static bool TryFind(this UpdateRelay value, string name, out UpdateRelay result)
+        {
+            if (value.Name == name)
+            {
+                result = value;
+                return true;
+            }
+
+            foreach (var child in value.Childs)
+            {
+                if (child.TryFind(name, out result)) return true;
+            }
+
+            result = null;
+            return false;
+        }
+        private static string Print(this UpdateRelay value, string output = "", int depth = 0)
+        {
+            for (var i = 0; i < depth; i++)
+            {
+                for (var j = 0; j < 3; j++) output += "-";
+            }
+            output += $"|{value.Name}\n";
+
+            foreach (var child in value.Childs) output = child.Print(output, depth + 1);
+
+            return output;
+        }
+        
         #region Nested Types
 
         public struct UpdateECS { }

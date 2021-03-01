@@ -1,0 +1,16 @@
+{
+    "name": "Flux.Audio",
+    "references": [
+        "GUID:e299517f675550643bb2fef708da51a6",
+        "GUID:5b1f4d12184a619469286222b9440056"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

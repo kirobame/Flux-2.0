@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace Flux
+namespace Flux.Audio
 {
     /// <summary><c>ScriptableObject</c> wrapper class to map a key Type onto <c>IAudioPackage</c> values</summary>
     public abstract class AudioMap<TKey> : AudioPackage
@@ -33,7 +33,7 @@ namespace Flux
 
         public override void AssignTo(AudioSource source, EventArgs inArgs)
         {
-            if (!(inArgs is WrapperArgs<TKey> keyArgs)) return; // If no key was passed, do nothing
+            if (!(inArgs is IWrapper<TKey> keyArgs)) return; // If no key was passed, do nothing
             
             if (!hasBeenBootedUp) // If the dictionary hasn't been initialized, do so only once
             {
@@ -41,7 +41,7 @@ namespace Flux
                 hasBeenBootedUp = true;
             }
             
-            packages[keyArgs.ArgOne].AssignTo(source, inArgs);
+            packages[keyArgs.Value].AssignTo(source, inArgs);
         }
         
         public bool TryGet(TKey key, out AudioPackage value)

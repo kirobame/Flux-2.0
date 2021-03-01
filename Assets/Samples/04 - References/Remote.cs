@@ -1,4 +1,5 @@
 ﻿using Flux;
+using Flux.Data;
 using UnityEngine;
 
 namespace Example04

@@ -4,7 +4,7 @@ using UnityEngine;
 using UnityEngine.AddressableAssets;
 using UnityEngine.ResourceManagement.AsyncOperations;
 
-namespace Flux
+namespace Flux.EDS
 {
     public abstract class BindedSystem : System
     {

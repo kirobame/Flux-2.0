@@ -1,7 +1,7 @@
 ﻿using System;
 using UnityEngine;
 
-namespace Flux
+namespace Flux.Audio
 {
     /// <summary>Basic pasting of 3d spatial settings onto an <c>AudioSource</c>.</summary>
     [CreateAssetMenu(fileName = "NewAudioClipPackage", menuName = "Audio Packages/3d settings", order = 215)]

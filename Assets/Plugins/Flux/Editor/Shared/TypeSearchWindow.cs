@@ -76,7 +76,12 @@ namespace Flux.Editor
                 
                 foreach (var nodeType in category.Values)
                 {
-                    tree.Add(new SearchTreeEntry(new GUIContent(nodeType.Name, indent))
+                    var name = nodeType.Name;
+                    
+                    var attribute = nodeType.GetCustomAttribute<NameAttribute>();
+                    if (attribute != null) name = attribute.Value;
+                    
+                    tree.Add(new SearchTreeEntry(new GUIContent(name, indent))
                     {
                         userData = nodeType,
                         level = depth + 1

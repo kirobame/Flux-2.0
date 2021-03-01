@@ -1,7 +1,7 @@
 ﻿using System;
 using UnityEngine;
 
-namespace Flux
+namespace Flux.Event
 {
     public class Listener : MonoBehaviour
     {

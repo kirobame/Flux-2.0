@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Flux
+namespace Flux.EDS
 {
     internal class DataRemoval : Command
     {

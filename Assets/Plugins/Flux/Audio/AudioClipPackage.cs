@@ -2,7 +2,7 @@
 using UnityEngine;
 using UnityEngine.Audio;
 
-namespace Flux
+namespace Flux.Audio
 {
     /// <summary>Essential implementation of <c>IAudioPackage</c> allowing to play an <c>AudioClip</c>.</summary>
     [CreateAssetMenu(fileName = "NewAudioClipPackage", menuName = "Audio Packages/Clip", order = 215)]

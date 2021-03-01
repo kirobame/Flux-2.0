@@ -1,7 +1,7 @@
 ﻿using System;
 using UnityEngine;
 
-namespace Flux
+namespace Flux.Audio
 {
     /// <summary>Direct mapping of the corresponding <c>AudioSource</c>'s value.</summary>
     public struct AudioPriority : IAudioPackage

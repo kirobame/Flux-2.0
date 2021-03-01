@@ -1,4 +1,4 @@
-﻿namespace Flux
+﻿namespace Flux.EDS
 {
     public abstract class System
     {

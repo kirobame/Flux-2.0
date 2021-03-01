@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace Flux
+namespace Flux.EDS
 {
     public class UpdateRelay : IComparable<UpdateRelay>
     {
@@ -23,7 +23,7 @@ namespace Flux
         public IReadOnlyList<UpdateRelay> Childs => childs;
         protected List<UpdateRelay> childs;
 
-        private System system;
+        private EDS.System system;
         private bool hasSystem;
         
         //---[Utilities]------------------------------------------------------------------------------------------------/
@@ -33,7 +33,7 @@ namespace Flux
             After = after;
             Before = before;
         }
-        public void Inject(System system)
+        public void Inject(EDS.System system)
         {
             this.system = system;
             hasSystem = true;

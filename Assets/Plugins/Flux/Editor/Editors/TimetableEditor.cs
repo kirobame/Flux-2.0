@@ -1,15 +1,11 @@
 ﻿using System;
-using System.Collections;
 using System.Globalization;
 using System.Linq;
+using Flux.Feedbacks;
 using Sirenix.Utilities.Editor;
 using UnityEditor;
 using UnityEditor.Experimental.GraphView;
-using UnityEditor.UIElements;
 using UnityEngine;
-using UnityEngine.UIElements;
-using Cursor = UnityEngine.Cursor;
-using Label = UnityEngine.UIElements.Label;
 
 namespace Flux.Editor
 {
@@ -129,9 +125,9 @@ namespace Flux.Editor
         
         void OnGUI()
         {
-            if (Event.current.OnMouseDown(1))
+            if (UnityEngine.Event.current.OnMouseDown(1))
             {
-                cachedPosition = windowRect.position + Event.current.mousePosition;
+                cachedPosition = windowRect.position + UnityEngine.Event.current.mousePosition;
                 menu.ShowAsContext();
             }
 
@@ -151,7 +147,7 @@ namespace Flux.Editor
                 hasChanged = false;
             }
             
-            if (Event.current.OnMouseUp(0) && interaction != Interaction.None)
+            if (UnityEngine.Event.current.OnMouseUp(0) && interaction != Interaction.None)
             {
                 interaction = Interaction.None;
                 interactiveSegmentIndex = -1;
@@ -376,7 +372,7 @@ namespace Flux.Editor
 
         private void HandleInteraction(Rect rect)
         {
-            if (Event.current.OnMouseMoveDrag())
+            if (UnityEngine.Event.current.OnMouseMoveDrag())
             {
                 var draggedSegmentProperty = arrayProperty.GetArrayElementAtIndex(interactiveSegmentIndex);
                 draggedSegmentProperty.Next(true);
@@ -384,7 +380,7 @@ namespace Flux.Editor
                 
                 if (interaction == Interaction.Slide)
                 {
-                    var ratio = Event.current.delta.x / rect.width;
+                    var ratio = UnityEngine.Event.current.delta.x / rect.width;
 
                     if (span.x + ratio < 0.0f)
                     {
@@ -403,10 +399,10 @@ namespace Flux.Editor
                 else
                 {
                     drawLine = true;
-                    var position = Event.current.mousePosition - rect.position;    
+                    var position = UnityEngine.Event.current.mousePosition - rect.position;    
                     
                     float ratio;
-                    if (Event.current.control)
+                    if (UnityEngine.Event.current.control)
                     {
                         var step = rect.width * timeStep;
                         var roundedValue = Mathf.Round(position.x / step) * step;
@@ -434,7 +430,7 @@ namespace Flux.Editor
         {
             EditorGUIUtility.AddCursorRect(rect, cursor);
 
-            if (Event.current.OnMouseDown(rect, 0))
+            if (UnityEngine.Event.current.OnMouseDown(rect, 0))
             {
                 this.interaction = interaction;
 

@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace Flux
+namespace Flux.Audio
 {
     /// <summary>Representation of an embedded collection of <c>IAudioPackage</c>.</summary>
     public abstract class AudioCollectionPackage : IAudioPackage

@@ -1,6 +1,8 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using Flux;
+using Flux.Audio;
+using Flux.Event;
 using UnityEngine;
 using UnityEngine.AddressableAssets;
 
@@ -37,11 +39,11 @@ namespace Example09
         {
             // Usage if the IAudioPackage allows the combination of audio effects
             // E.g : .Chain(...) will give leftAudio the defined Player.stereoPan to the AudioSource responsible for playing the IAudioPackage
-            if (Input.GetMouseButtonDown(0)) Audio.Play(leftAudio.Chain(new StereoPan(stereoPan)));
+            if (Input.GetMouseButtonDown(0)) AudioHandler.Play(leftAudio.Chain(new StereoPan(stereoPan)));
             
             // Usage of EventArgs allow to put some selective logic in IAudioPackage
             // In this case rightAudio is a AudioMapById which means the audi played corresponds the given Id
-            if (Input.GetMouseButtonDown(1)) Audio.Play(rightAudio, new WrapperArgs<Id>(id));
+            if (Input.GetMouseButtonDown(1)) AudioHandler.Play(rightAudio, new WrapperArgs<Id>(id));
         }
     }
 }

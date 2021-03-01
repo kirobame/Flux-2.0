@@ -1,5 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using Flux.Audio;
+using Flux.Data;
 using UnityEditor;
 using UnityEditorInternal;
 using UnityEngine;
@@ -62,7 +64,7 @@ namespace Flux.Editor
                 matches.Add(output);
             }
 
-            if (matches.Any())
+            if (matches.Count > 1)
             {
                 if (collectionCount == 0) collectionCount = Selection.gameObjects.Length - 1;
                 

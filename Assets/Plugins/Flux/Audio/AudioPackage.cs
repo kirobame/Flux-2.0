@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.ObjectModel;
 using UnityEngine;
 
-namespace Flux
+namespace Flux.Audio
 {
     /// <summary><c>ScriptableObject</c> implementation of <c>IAudioPackage</c>.</summary>
     public abstract class AudioPackage : ScriptableObject, IAudioPackage

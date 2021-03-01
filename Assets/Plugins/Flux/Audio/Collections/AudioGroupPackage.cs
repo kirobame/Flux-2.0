@@ -1,7 +1,7 @@
 ﻿using System;
 using UnityEngine;
 
-namespace Flux
+namespace Flux.Audio
 {
     /// <summary>Simple grouping of <c>IAudioPackage</c>. All childs will be called on the Assignation.</summary>
     public class AudioGroupPackage : AudioCollectionPackage

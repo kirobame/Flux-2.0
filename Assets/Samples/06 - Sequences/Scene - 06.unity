@@ -431,7 +431,7 @@ MonoBehaviour:
       y: 100
       width: 73
       height: 71
-    linkIndices: 0200000004000000
+    linkIndices: 0000000005000000
   effects:
   - id: 0
   - id: 1
@@ -443,86 +443,86 @@ MonoBehaviour:
   references:
     version: 1
     00000000:
+      type: {class: Label, ns: Flux.Feedbacks, asm: Flux.Feedbacks}
+      data:
+        rect:
+          serializedVersion: 2
+          x: 276
+          y: -24
+          width: 156
+          height: 99
+        linkIndices: 01000000
+        name: LOOP
+    00000001:
       type: {class: Animation, ns: Example06, asm: Assembly-CSharp}
       data:
         rect:
           serializedVersion: 2
-          x: 458
-          y: 4
+          x: 478
+          y: -24
           width: 252
           height: 140
-        linkIndices: 01000000
+        linkIndices: 02000000
         animator: {fileID: 1812711642}
         triggerName: Play
         outTag: Void
-    00000001:
-      type: {class: Loop, ns: Flux, asm: Assembly-CSharp-firstpass}
+    00000002:
+      type: {class: Loop, ns: Flux.Feedbacks, asm: Flux.Feedbacks}
       data:
         rect:
           serializedVersion: 2
-          x: 760
-          y: 4
+          x: 768
+          y: -24
           width: 156
           height: 120
         linkIndices: 03000000
         target: LOOP
         count: 2
-    00000002:
-      type: {class: Label, ns: Flux, asm: Assembly-CSharp-firstpass}
-      data:
-        rect:
-          serializedVersion: 2
-          x: 259
-          y: 4
-          width: 156
-          height: 99
-        linkIndices: 00000000
-        name: LOOP
     00000003:
-      type: {class: End, ns: Flux, asm: Assembly-CSharp-firstpass}
+      type: {class: End, ns: Flux.Feedbacks, asm: Flux.Feedbacks}
       data:
         rect:
           serializedVersion: 2
-          x: 947
-          y: 4
+          x: 972
+          y: -24
           width: 102
           height: 71
         linkIndices: 
     00000004:
-      type: {class: Wait, ns: Flux, asm: Assembly-CSharp-firstpass}
-      data:
-        rect:
-          serializedVersion: 2
-          x: 261
-          y: 206
-          width: 142
-          height: 99
-        linkIndices: 05000000
-        time: 0.4
-    00000005:
       type: {class: ChannelFill, ns: Example06, asm: Assembly-CSharp}
       data:
         rect:
           serializedVersion: 2
-          x: 443
-          y: 206
+          x: 475
+          y: 242
           width: 130
           height: 135
         linkIndices: 06000000
         r: 0
         g: 0
         b: 1
+    00000005:
+      type: {class: Wait, ns: Flux.Feedbacks, asm: Flux.Feedbacks}
+      data:
+        rect:
+          serializedVersion: 2
+          x: 294
+          y: 242
+          width: 141
+          height: 99
+        linkIndices: 04000000
+        time: 0.5
     00000006:
       type: {class: ChangeColor, ns: Example06, asm: Assembly-CSharp}
       data:
         rect:
           serializedVersion: 2
-          x: 616
-          y: 206
+          x: 668
+          y: 242
           width: 271
           height: 119
         linkIndices: 
-        duration: 0.5
+        duration: 0.75
         renderer: {fileID: 1812711637}
 --- !u!114 &1812711640
 MonoBehaviour:
@@ -544,7 +544,7 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls:
       - m_Target: {fileID: 1812711639}
-        m_TargetAssemblyTypeName: Flux.Sequencer, Assembly-CSharp-firstpass
+        m_TargetAssemblyTypeName: Flux.Feedbacks.Sequencer, Flux.Feedbacks
         m_MethodName: Play
         m_Mode: 0
         m_Arguments:

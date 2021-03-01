@@ -1,5 +1,6 @@
 ﻿using Example02;
 using Flux;
+using Flux.EDS;
 using UnityEngine;
 
 namespace Example03
@@ -10,7 +11,7 @@ namespace Example03
     // Then order must always respect the format After/Before and allows sorting of groups or systems in their local hierarchy
     // A group only has to be declared once
     [Group("Init", "Any/Update"), Order("Init/Reset", "Any/Any")]
-    public class ResetSystem : Flux.System // Resets the isLocked value before any the other systems are Updated because Init goes before Update
+    public class ResetSystem : Flux.EDS.System // Resets the isLocked value before any the other systems are Updated because Init goes before Update
     {
         public override void Update()
         {
@@ -22,7 +23,7 @@ namespace Example03
     
     // Try to switch the order for the OrderAttribute to notice if the actions can still be made or not
     [Group("Update", "Init/Any"), Order("Update/Lock", "Race/Any")]
-    public class LockSystem : Flux.System // Locks the ability to modify the Advance data by the Race system only if it is updated before it
+    public class LockSystem : Flux.EDS.System // Locks the ability to modify the Advance data by the Race system only if it is updated before it
     {
         public override void Update()
         {

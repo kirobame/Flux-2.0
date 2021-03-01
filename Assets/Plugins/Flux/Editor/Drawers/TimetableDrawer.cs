@@ -1,4 +1,5 @@
-﻿using UnityEditor;
+﻿using Flux.Feedbacks;
+using UnityEditor;
 using UnityEngine;
 using NotImplementedException = System.NotImplementedException;
 
@@ -45,7 +46,7 @@ namespace Flux.Editor
                 window = ScriptableObject.CreateInstance(typeof(TimetableEditor)) as TimetableEditor;
                 window.titleContent = EditorGUIUtility.TrTextContentWithIcon("Timetable", "SceneViewFx");
                 
-                var position = GUIUtility.GUIToScreenPoint(Event.current.mousePosition);
+                var position = GUIUtility.GUIToScreenPoint(UnityEngine.Event.current.mousePosition);
                 var fullRect = EditorGUIUtility.GetMainWindowPosition();
                 
                 var width = fullRect.width - position.x - padding;

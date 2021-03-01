@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Flux
+namespace Flux.Event
 {
     public class SendbackArgs : EventArgs, ISendback
     {

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using Flux.Data;
 using UnityEditor;
 using UnityEngine;
 using Object = UnityEngine.Object;

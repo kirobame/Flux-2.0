@@ -1,5 +1,6 @@
 ﻿using System;
 using Flux;
+using Flux.Event;
 using UnityEngine;
 
 namespace Example06

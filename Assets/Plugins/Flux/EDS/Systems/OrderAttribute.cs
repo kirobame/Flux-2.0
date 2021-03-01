@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Flux
+namespace Flux.EDS
 {
     public abstract class SystemUpdateAttribute : Attribute
     {
@@ -25,13 +25,13 @@ namespace Flux
         public string After { get; private set; }
         public string Before { get; private set; }
     }
-    
+
     [AttributeUsage(AttributeTargets.Class)]
     public class GroupAttribute : SystemUpdateAttribute
     {
         public GroupAttribute(string path, string order) : base(path, order) { }
     }
-    
+
     [AttributeUsage(AttributeTargets.Class)]
     public class OrderAttribute : SystemUpdateAttribute
     {

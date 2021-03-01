@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using UnityEngine;
 
-namespace Flux
+namespace Flux.EDS
 {
     public class Entity : MonoBehaviour
     {

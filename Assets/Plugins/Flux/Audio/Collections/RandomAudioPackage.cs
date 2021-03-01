@@ -2,7 +2,7 @@
 using UnityEngine;
 using Random = UnityEngine.Random;
 
-namespace Flux
+namespace Flux.Audio
 {
     /// <summary>Picks a random <c>IAudioPackage</c> for execution.</summary>
     public class RandomAudioPackage : AudioCollectionPackage

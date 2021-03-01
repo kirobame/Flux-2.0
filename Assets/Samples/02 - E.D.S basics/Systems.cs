@@ -1,9 +1,10 @@
 ﻿using Flux;
+using Flux.EDS;
 using UnityEngine;
 
 namespace Example02
 {
-    public class RotateSystem : Flux.System
+    public class RotateSystem : Flux.EDS.System
     {
         public override void Update() // Systems are the last to be updated in the Player loop
         {
@@ -26,7 +27,7 @@ namespace Example02
         }
     }
     
-    public class OscillateSystem : Flux.System
+    public class OscillateSystem : Flux.EDS.System
     {
         public override void Update()
         {

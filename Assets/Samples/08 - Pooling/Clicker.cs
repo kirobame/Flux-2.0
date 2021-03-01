@@ -1,4 +1,5 @@
 ﻿using Flux;
+using Flux.Data;
 using Sirenix.OdinInspector;
 using UnityEngine;
 using UnityEngine.AddressableAssets;
