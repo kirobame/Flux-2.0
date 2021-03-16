@@ -16,10 +16,16 @@ namespace Flux
             Object.DontDestroyOnLoad(hookObject);
             hook = hookObject.AddComponent<Hook>();
         }
+        
+        public static void Clear() => hook.StopAllCoroutines();
 
         public static Coroutine Start(IEnumerator routine) => hook.StartCoroutine(routine);
-        public static void Stop(IEnumerator routine) => hook.StopCoroutine(routine);
-        
+        public static bool Stop(Coroutine routine)
+        {
+            hook.StopCoroutine(routine);
+            return true;
+        }
+
         public static IEnumerator Chain(this IEnumerator source, IEnumerator routine)
         {
             yield return source;

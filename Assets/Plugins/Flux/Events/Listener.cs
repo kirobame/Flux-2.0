@@ -13,7 +13,7 @@ namespace Flux.Event
         void Awake()
         {
             flag.Bootup();
-            Events.Register(flag.Value, Callback);
+            Events.Subscribe(flag.Value, Callback);
         }
 
         void OnEnable()
@@ -24,9 +24,9 @@ namespace Flux.Event
                 return;
             }
             
-            Events.Register(flag.Value, Callback);
+            Events.Subscribe(flag.Value, Callback);
         }
-        void OnDisable() => Events.Unregister(flag.Value, Callback);
+        void OnDisable() => Events.Unsubscribe(flag.Value, Callback);
 
         void Callback(EventArgs args) => genericEvent.Invoke(args);
     }

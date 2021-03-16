@@ -23,18 +23,16 @@ namespace Example05
             
             // Subscription to the Player event before its instantiation is not a problem
             // Many overloads exists to ease standard processes like simply passing data or specific EventArgs
-            Events.RelayByVoid(GameEvent.OnPlayerMove, OnPlayerMoveArgless); // Passes nothing
-            Events.Register(GameEvent.OnPlayerMove, OnPlayerMove); // Standard subscription
-            Events.RelayByCast<WrapperArgs<Vector2>>(GameEvent.OnPlayerMove, OnPlayerMoveCasted); // Casts implicitly the received EventArgs
-            Events.RelayByValue<Vector2>(GameEvent.OnPlayerMove, OnPlayerMoveExplicit); // Directly passes a value if possible
+            Events.Subscribe(GameEvent.OnPlayerMove, OnPlayerMoveArgless); // Passes nothing
+            Events.Subscribe(GameEvent.OnPlayerMove, OnPlayerMove); // Standard subscription
+            Events.Subscribe<Vector2>(GameEvent.OnPlayerMove, OnPlayerMoveExplicit); // Directly passes a value if possible
         }
         
         void OnDestroy() // Like regular delegates, unsubscription must be based on logic AND lifetime!
         {
-            Events.BreakVoidRelay(GameEvent.OnPlayerMove, OnPlayerMoveArgless);
-            Events.Unregister(GameEvent.OnPlayerMove, OnPlayerMove);
-            Events.BreakCastRelay<WrapperArgs<Vector2>>(GameEvent.OnPlayerMove, OnPlayerMoveCasted);
-            Events.BreakValueRelay<Vector2>(GameEvent.OnPlayerMove, OnPlayerMoveExplicit);
+            Events.Unsubscribe(GameEvent.OnPlayerMove, OnPlayerMoveArgless);
+            Events.Unsubscribe(GameEvent.OnPlayerMove, OnPlayerMove);
+            Events.Unsubscribe<Vector2>(GameEvent.OnPlayerMove, OnPlayerMoveExplicit);
             
             // Alternatively, you can wipe the current event addresses with Events.Clear();
         }
@@ -66,10 +64,6 @@ namespace Example05
             if (!(args is WrapperArgs<Vector2> castedArgs)) return;
             
             queue.Enqueue($"IMPLICIT : Player has moved");
-        }
-        void OnPlayerMoveCasted(WrapperArgs<Vector2> args)
-        {
-            queue.Enqueue($"CAST : Player has moved");
         }
         void OnPlayerMoveExplicit(Vector2 delta)
         {

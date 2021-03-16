@@ -9,11 +9,7 @@ namespace Example05
     {
         [SerializeField] private float speed;
         
-        void Awake()
-        {
-            Debug.Log("Player has spawned"); // Attestation of the Player spawns, after the CameraTracker
-            Events.Open(GameEvent.OnPlayerMove); // Open the event, any early subscribers will catch up
-        }
+        void Awake() => Debug.Log("Player has spawned"); // Attestation of the Player spawns, after the CameraTracker
         
         void Update()
         {
@@ -26,7 +22,7 @@ namespace Example05
                 transform.Translate(delta);
                 
                 // Calling the event once the operation has been done
-                Events.ZipCall(GameEvent.OnPlayerMove, delta); // == Events.Call(GameEvent.OnPlayerMove, new WrapperArgs<Vector2>(delta));
+                Events.Call(GameEvent.OnPlayerMove, delta); // == Events.Call(GameEvent.OnPlayerMove, new WrapperArgs<Vector2>(delta));
             }
         }
     }

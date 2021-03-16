@@ -11,8 +11,6 @@ namespace Example06
         
         void Awake()
         {
-            Events.Open(Feedback.Unique);
-            
             // Create the EventArgs which will be sent to the sequence & subscribe to its callback to resume logic after the feedback is done
             var args = new CustomArgs(channel);
             args.onDone += OnDone;

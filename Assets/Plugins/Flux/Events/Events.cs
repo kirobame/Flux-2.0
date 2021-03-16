@@ -6,387 +6,244 @@ namespace Flux.Event
 {
     public static class Events
     {
-        //---[Data]-----------------------------------------------------------------------------------------------------/
-
-        private static Dictionary<int, EventWrapper> wrappers;
-        private static Dictionary<int, HashSet<Action<EventArgs>>> toWrap;
-
-        private static Dictionary<int, List<EventRelay>> relays;
-
-        private static FlagTranslator flagTranslator;
-
-        //---[Initialization]-------------------------------------------------------------------------------------------/
-
-        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterAssembliesLoaded)]
-        private static void Bootup()
-        {
-            wrappers = new Dictionary<int, EventWrapper>();
-            toWrap = new Dictionary<int, HashSet<Action<EventArgs>>>();
-
-            relays = new Dictionary<int, List<EventRelay>>();
-
-            flagTranslator = new FlagTranslator();
-        }
-
-        //---[Utilities]------------------------------------------------------------------------------------------------/
-
-        public static void Clear()
-        {
-            wrappers.Clear();
-            toWrap.Clear();
-
-            relays.Clear();
-        }
-
-        public static void ResetFlagTranslation()
-        {
-            flagTranslator.Reset();
-        }
-
-        //---[Open]-----------------------------------------------------------------------------------------------------/
-
-        public static void Open(Enum address)
-        {
-            var key = flagTranslator.Translate(address);
-            if (wrappers.ContainsKey(key)) return;
-
-            var wrapper = new EventWrapper();
-            if (toWrap.TryGetValue(key, out var hashSet))
-            {
-                foreach (var method in hashSet) wrapper.callback += method;
-                toWrap.Remove(key);
-            }
-
-            wrappers.Add(key, wrapper);
-        }
-
-        //---[Call]-----------------------------------------------------------------------------------------------------/
-
-        public static void EmptyCall(Enum address)
-        {
-            Call(address, EventArgs.Empty);
-        }
-
-        public static void Call(Enum address, EventArgs args)
-        {
-            var key = flagTranslator.Translate(address);
-            wrappers[key].Call(args);
-        }
-
-        public static void ZipCall<T1>(Enum address, T1 argOne)
-        {
-            Call(address, new WrapperArgs<T1>(argOne));
-        }
-
-        public static void ZipCall<T1, T2>(Enum address, T1 argOne, T2 argTwo)
-        {
-            Call(address, new WrapperArgs<T1, T2>(argOne, argTwo));
-        }
-
-        public static void ZipCall<T1, T2, T3>(Enum address, T1 argOne, T2 argTwo, T3 argThree)
-        {
-            Call(address, new WrapperArgs<T1, T2, T3>(argOne, argTwo, argThree));
-        }
-
-        public static void ZipCall<T1, T2, T3, T4>(Enum address, T1 argOne, T2 argTwo, T3 argThree, T4 argFour)
-        {
-            Call(address, new WrapperArgs<T1, T2, T3, T4>(argOne, argTwo, argThree, argFour));
-        }
-
-        //---[Register]-------------------------------------------------------------------------------------------------/
-
-        public static void Register(Enum address, Action<EventArgs> method)
-        {
-            var key = flagTranslator.Translate(address);
-            if (wrappers.ContainsKey(key))
-            {
-                wrappers[key].callback += method;
-            }
-            else
-            {
-                if (!toWrap.TryGetValue(key, out var hashSet))
-                {
-                    hashSet = new HashSet<Action<EventArgs>>();
-                    toWrap.Add(key, hashSet);
-                }
-
-                hashSet.Add(method);
-            }
-        }
-
-        public static void RelayByVoid(Enum address, Action method)
-        {
-            Relay<VoidRelay>(address, method);
-        }
-
-        public static void RelayByCast<T>(Enum address, Action<T> method) where T : EventArgs
-        {
-            Relay<CastRelay<T>>(address, method);
-        }
-
-        public static void RelayByValue<T1>(Enum address, Action<T1> method)
-        {
-            Relay<GenericRelay<T1>>(address, method);
-        }
-
-        public static void RelayByValue<T1, T2>(Enum address, Action<T1, T2> method)
-        {
-            Relay<GenericRelay<T1, T2>>(address, method);
-        }
-
-        public static void RelayByValue<T1, T2, T3>(Enum address, Action<T1, T2, T3> method)
-        {
-            Relay<GenericRelay<T1, T2, T3>>(address, method);
-        }
-
-        public static void RelayByValue<T1, T2, T3, T4>(Enum address, Action<T1, T2, T3, T4> method)
-        {
-            Relay<GenericRelay<T1, T2, T3, T4>>(address, method);
-        }
-
-        private static void Relay<TRelay>(Enum address, object method) where TRelay : EventRelay, new()
-        {
-            var key = flagTranslator.Translate(address);
-            if (relays.TryGetValue(key, out var possibilities))
-            {
-                foreach (var relay in possibilities)
-                {
-                    if (!(relay is TRelay castedRelay)) continue;
-
-                    castedRelay.Subscribe(method);
-                    return;
-                }
-            }
-            else
-            {
-                possibilities = new List<EventRelay>();
-                relays.Add(key, possibilities);
-            }
-
-            var newRelay = new TRelay();
-            Register(address, newRelay.Call);
-            newRelay.Subscribe(method);
-
-            possibilities.Add(newRelay);
-        }
-
-        //---[Unregister]-----------------------------------------------------------------------------------------------/
-
-        public static void Unregister(Enum address, Action<EventArgs> method)
-        {
-            var key = flagTranslator.Translate(address);
-            if (wrappers.ContainsKey(key)) wrappers[key].callback -= method;
-            else if (toWrap.ContainsKey(key)) toWrap[key].Remove(method);
-        }
-
-        public static void BreakVoidRelay(Enum address, Action method)
-        {
-            BreakRelay<VoidRelay>(address, method);
-        }
-
-        public static void BreakCastRelay<T>(Enum address, Action<T> method) where T : EventArgs
-        {
-            BreakRelay<CastRelay<T>>(address, method);
-        }
-
-        public static void BreakValueRelay<T1>(Enum address, Action<T1> method)
-        {
-            BreakRelay<GenericRelay<T1>>(address, method);
-        }
-
-        public static void BreakValueRelay<T1, T2>(Enum address, Action<T1, T2> method)
-        {
-            BreakRelay<GenericRelay<T1, T2>>(address, method);
-        }
-
-        public static void BreakValueRelay<T1, T2, T3>(Enum address, Action<T1, T2, T3> method)
-        {
-            BreakRelay<GenericRelay<T1, T2, T3>>(address, method);
-        }
-
-        public static void BreakValueRelay<T1, T2, T3, T4>(Enum address, Action<T1, T2, T3, T4> method)
-        {
-            BreakRelay<GenericRelay<T1, T2, T3, T4>>(address, method);
-        }
-
-        private static void BreakRelay<TRelay>(Enum address, object method) where TRelay : EventRelay
-        {
-            var key = flagTranslator.Translate(address);
-            if (relays.TryGetValue(key, out var possibilities))
-                for (var i = 0; i < possibilities.Count; i++)
-                {
-                    var relay = possibilities[i];
-                    if (!(relay is TRelay castedRelay)) continue;
-
-                    castedRelay.Unsubscribe(method);
-                    if (!relay.IsOperational)
-                    {
-                        Unregister(address, castedRelay.Call);
-                        possibilities.RemoveAt(i);
-                    }
-
-                    return;
-                }
-        }
-
         #region Nested Types
 
         private class EventWrapper
         {
             public event Action<EventArgs> callback;
 
+            public bool IsLocked { get; set; } = false;            
+            
+            private List<EventRelay> relays = new List<EventRelay>();
+
             public void Call(EventArgs args)
             {
+                if (IsLocked) return;   
                 callback?.Invoke(args);
             }
-        }
-
-        private abstract class EventRelay
-        {
-            private short subscriptions;
-            public bool IsOperational => subscriptions > 0;
-
-            public abstract void Call(EventArgs args);
-
-            public void Subscribe(object method)
+            public void CallUnsafe(EventArgs args)
             {
-                subscriptions++;
-                OnSubscription(method);
+                if (IsLocked) return;   
+                callback(args);
             }
 
-            protected abstract void OnSubscription(object method);
-
-            public void Unsubscribe(object method)
+            public bool Relay<TRelay>(object method, out EventRelay match) where TRelay : EventRelay, new()
             {
-                subscriptions--;
-                OnSubscription(method);
+                foreach (var existingRelay in relays)
+                {
+                    if (!(existingRelay is TRelay castedRelay)) continue;
+
+                    castedRelay.Subscribe(method);
+                    match = castedRelay;
+                    
+                    return false;
+                }
+
+                var relay = new TRelay();
+                relay.Subscribe(method);
+                relays.Add(relay);
+
+                match = relay;
+                return true;
             }
-
-            protected abstract void OnUnsubscription(object method);
-        }
-
-        private class VoidRelay : EventRelay
-        {
-            private event Action callback;
-
-            public override void Call(EventArgs args)
+            public void Suppress<TRelay>(object method) where TRelay : EventRelay
             {
-                callback();
-            }
+                foreach (var existingRelay in relays)
+                {
+                    if (!(existingRelay is TRelay castedRelay)) continue;
 
-            protected override void OnSubscription(object method)
-            {
-                callback += (Action) method;
-            }
-
-            protected override void OnUnsubscription(object method)
-            {
-                callback -= (Action) method;
-            }
-        }
-
-        private class GenericRelay<T1> : EventRelay
-        {
-            private event Action<T1> callback;
-
-            public override void Call(EventArgs args)
-            {
-                if (args is WrapperArgs<T1> wrapperArgs) callback(wrapperArgs.ArgOne);
-            }
-
-            protected override void OnSubscription(object method)
-            {
-                callback += (Action<T1>) method;
-            }
-
-            protected override void OnUnsubscription(object method)
-            {
-                callback -= (Action<T1>) method;
-            }
-        }
-
-        private class GenericRelay<T1, T2> : EventRelay
-        {
-            private event Action<T1, T2> callback;
-
-            public override void Call(EventArgs args)
-            {
-                if (args is WrapperArgs<T1, T2> wrapperArgs) callback(wrapperArgs.ArgOne, wrapperArgs.ArgTwo);
-            }
-
-            protected override void OnSubscription(object method)
-            {
-                callback += (Action<T1, T2>) method;
-            }
-
-            protected override void OnUnsubscription(object method)
-            {
-                callback -= (Action<T1, T2>) method;
-            }
-        }
-
-        private class GenericRelay<T1, T2, T3> : EventRelay
-        {
-            private event Action<T1, T2, T3> callback;
-
-            public override void Call(EventArgs args)
-            {
-                if (args is WrapperArgs<T1, T2, T3> wrapperArgs)
-                    callback(wrapperArgs.ArgOne, wrapperArgs.ArgTwo, wrapperArgs.ArgThree);
-            }
-
-            protected override void OnSubscription(object method)
-            {
-                callback += (Action<T1, T2, T3>) method;
-            }
-
-            protected override void OnUnsubscription(object method)
-            {
-                callback -= (Action<T1, T2, T3>) method;
-            }
-        }
-
-        private class GenericRelay<T1, T2, T3, T4> : EventRelay
-        {
-            private event Action<T1, T2, T3, T4> callback;
-
-            public override void Call(EventArgs args)
-            {
-                if (args is WrapperArgs<T1, T2, T3, T4> wrapperArgs)
-                    callback(wrapperArgs.ArgOne, wrapperArgs.ArgTwo, wrapperArgs.ArgThree, wrapperArgs.ArgFour);
-            }
-
-            protected override void OnSubscription(object method)
-            {
-                callback += (Action<T1, T2, T3, T4>) method;
-            }
-
-            protected override void OnUnsubscription(object method)
-            {
-                callback -= (Action<T1, T2, T3, T4>) method;
-            }
-        }
-
-        private class CastRelay<T> : EventRelay where T : EventArgs
-        {
-            private event Action<T> callback;
-
-            public override void Call(EventArgs args)
-            {
-                if (args is T castedArgs) callback(castedArgs);
-            }
-
-            protected override void OnSubscription(object method)
-            {
-                callback += (Action<T>) method;
-            }
-
-            protected override void OnUnsubscription(object method)
-            {
-                callback -= (Action<T>) method;
+                    castedRelay.Unsubscribe(method);
+                    break;
+                }
             }
         }
 
         #endregion
+
+        //---[Data]-----------------------------------------------------------------------------------------------------/
+        
+        public static bool IsFullyLocked { get; private set; }
+        
+        private static Dictionary<int, EventWrapper> registry;
+        private static Dictionary<int, HashSet<Action<EventArgs>>> queue;
+        
+        private static FlagTranslator translator;
+
+        //---[Initialization]-------------------------------------------------------------------------------------------/
+
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterAssembliesLoaded)]
+        private static void Bootup()
+        {
+            registry = new Dictionary<int, EventWrapper>();
+            queue = new Dictionary<int, HashSet<Action<EventArgs>>>();
+
+            translator = new FlagTranslator();
+        }
+
+        //---[Utilities]------------------------------------------------------------------------------------------------/
+
+        public static void Clear()
+        {
+            registry.Clear();
+            queue.Clear();
+        }
+
+        public static void ResetFlagTranslation() => translator.Reset();
+
+        //---[General]-----------------------------------------------------------------------------------------------------/
+
+        private static void Open(int key, EventWrapper wrapper)
+        {
+            if (queue.TryGetValue(key, out var hashSet))
+            {
+                foreach (var method in hashSet) wrapper.callback += method;
+                queue.Remove(key);
+            }
+
+            registry.Add(key, wrapper);
+        }
+        private static EventWrapper GetWrapper(int key)
+        {
+            if (!registry.TryGetValue(key, out var output))
+            {
+                var wrapper = new EventWrapper();
+
+                Open(key, wrapper);
+                registry.Add(key, wrapper);
+
+                return wrapper;
+            }
+
+            return output;
+        }
+
+        public static bool Exists(Enum address)
+        {
+            var key = translator.Translate(address);
+            return registry.ContainsKey(key);
+        }
+        
+        //---[Lock]-----------------------------------------------------------------------------------------------------/
+
+        public static void LockAll()
+        {
+            IsFullyLocked = true;
+            foreach (var wrapper in registry.Values) wrapper.IsLocked = true;
+        }
+        public static void UnlockAll()
+        {
+            IsFullyLocked = false;
+            foreach (var wrapper in registry.Values) wrapper.IsLocked = false;
+        }
+        
+        public static void Lock(Enum address)
+        {
+            if (IsFullyLocked) return;
+            
+            var key = translator.Translate(address);
+            if (registry.TryGetValue(key, out var wrapper)) wrapper.IsLocked = true;
+        }
+        public static void Unlock(Enum address)
+        {
+            if (IsFullyLocked) return;
+            
+            var key = translator.Translate(address);
+            if (registry.TryGetValue(key, out var wrapper)) wrapper.IsLocked = false;
+        }
+
+        public static bool IsLocked(Enum address)
+        {
+            if (IsFullyLocked) return true;
+            
+            var key = translator.Translate(address);
+            if (registry.TryGetValue(key, out var wrapper)) return wrapper.IsLocked;
+            else return false;
+        }
+        
+        //---[Call]-----------------------------------------------------------------------------------------------------/
+        
+        public static void Call(Enum address, EventArgs args)
+        {
+            var key = translator.Translate(address);
+            GetWrapper(key).Call(args);
+        }
+        public static void CallUnsafe(Enum address, EventArgs args)
+        {
+            var key = translator.Translate(address);
+            GetWrapper(key).CallUnsafe(args);
+        }
+
+        public static void Call(Enum address) => Call(address, EventArgs.Empty);
+        public static void Call<T1>(Enum address, in T1 argOne) => Call(address, new WrapperArgs<T1>(argOne));
+        public static void Call<T1,T2>(Enum address, in T1 argOne, in T2 argTwo) => Call(address, new WrapperArgs<T1,T2>(argOne, argTwo));
+        public static void Call<T1,T2,T3>(Enum address, in T1 argOne, in T2 argTwo, in T3 argThree) => Call(address, new WrapperArgs<T1,T2,T3>(argOne, argTwo, argThree));
+        public static void Call<T1,T2,T3,T4>(Enum address, in T1 argOne, in T2 argTwo, in T3 argThree, in T4 argFour) => Call(address, new WrapperArgs<T1,T2,T3,T4>(argOne, argTwo, argThree, argFour));
+
+        //---[Subscribe]-------------------------------------------------------------------------------------------------/
+
+        public static EventToken Subscribe(Enum address, Action<EventArgs> method)
+        {
+            var key = translator.Translate(address);
+            if (registry.ContainsKey(key))
+            {
+                registry[key].callback += method;
+            }
+            else
+            {
+                if (!queue.TryGetValue(key, out var hashSet))
+                {
+                    hashSet = new HashSet<Action<EventArgs>>();
+                    queue.Add(key, hashSet);
+                }
+
+                hashSet.Add(method);
+            }
+            
+            return new Token(address, method);
+        }
+
+        public static EventToken Subscribe(Enum address, Action method) => Relay<VoidRelay>(address, method);
+        public static EventToken Subscribe<T1>(Enum address, Action<T1> method) => Relay<GenericRelay<T1>>(address, method);
+        public static EventToken Subscribe<T1,T2>(Enum address, Action<T1,T2> method) => Relay<GenericRelay<T1,T2>>(address, method);
+        public static EventToken Subscribe<T1,T2,T3>(Enum address, Action<T1,T2,T3> method) => Relay<GenericRelay<T1,T2,T3>>(address, method);
+        public static EventToken Subscribe<T1,T2,T3,T4>(Enum address, Action<T1,T2,T3,T4> method) => Relay<GenericRelay<T1,T2,T3,T4>>(address, method);
+
+        public static EventToken Relay<TRelay>(Enum address, object method) where TRelay : EventRelay, new()
+        {
+            var key = translator.Translate(address);
+            if (!registry.TryGetValue(key, out var wrapper))
+            {
+                wrapper = new EventWrapper();
+
+                Open(key, wrapper);
+                registry.Add(key, wrapper);
+            }
+
+            if (wrapper.Relay<TRelay>(method, out var relay)) registry[key].callback += relay.TryCall;
+            return new RelayToken<TRelay>(address, method);
+        }
+
+        //---[Unsubscribe]-----------------------------------------------------------------------------------------------/
+
+        public static void Unsubscribe(Enum address, Action<EventArgs> method)
+        {
+            var key = translator.Translate(address);
+            if (registry.ContainsKey(key)) registry[key].callback -= method;
+            else if (queue.ContainsKey(key)) queue[key].Remove(method);
+        }
+
+        public static void Unsubscribe(Enum address, Action method) => Suppress<VoidRelay>(address, method);
+        public static void Unsubscribe<T1>(Enum address, Action<T1> method) => Suppress<GenericRelay<T1>>(address, method);
+        public static void Unsubscribe<T1,T2>(Enum address, Action<T1,T2> method) => Suppress<GenericRelay<T1,T2>>(address, method);
+        public static void Unsubscribe<T1,T2,T3>(Enum address, Action<T1,T2,T3> method) => Suppress<GenericRelay<T1,T2,T3>>(address, method);
+        public static void Unsubscribe<T1,T2,T3,T4>(Enum address, Action<T1,T2,T3,T4> method) => Suppress<GenericRelay<T1,T2,T3,T4>>(address, method);
+
+        public static void Suppress<TRelay>(Enum address, object method) where TRelay : EventRelay
+        {
+            var key = translator.Translate(address);
+            if (!registry.TryGetValue(key, out var wrapper)) return;
+
+            wrapper.Suppress<TRelay>(method);
+        }
     }
 }
