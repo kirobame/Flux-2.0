@@ -6,7 +6,7 @@ using UnityEngine;
 
 namespace Flux.Editor
 {
-    [CustomEditor(typeof(Sequencer))]
+    [CustomEditor(typeof(Sequence))]
     public class SequencerInspector : UnityEditor.Editor
     {
         public override void OnInspectorGUI()

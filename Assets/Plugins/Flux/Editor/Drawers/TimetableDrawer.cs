@@ -18,8 +18,9 @@ namespace Flux.Editor
         {
             EditorGUI.BeginProperty(rect, label, property);
             EditorGUI.LabelField(rect, label);
-            
-            var contentRect = rect.GetValueRect().Indent(2.0f);
+
+            var header = rect.GetLayout();
+            var contentRect = header.value.Indent(2.0f);
             var spacing = 2.0f;
 
             var copy = property.Copy();

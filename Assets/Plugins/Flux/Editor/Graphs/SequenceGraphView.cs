@@ -15,7 +15,6 @@ namespace Flux.Editor
     {
         public SequenceGraphView(EditorWindow window)
         {
-            this.window = window;
             styleSheets.Add(Resources.Load<StyleSheet>("SequenceGraph"));
             
             SetupZoom(ContentZoomer.DefaultMinScale, ContentZoomer.DefaultMaxScale);
@@ -57,13 +56,11 @@ namespace Flux.Editor
         }
         
         //---[Data]-----------------------------------------------------------------------------------------------------/
-        
-        private int id;
-        private SerializedObject serializedObject;
+
+        private SerializedProperty serializedProperty;
         private SerializedProperty rootProperty;
         private SerializedProperty arrayProperty;
-
-        private EditorWindow window;
+        
         private TypeSearchWindow searchWindow;
 
         private List<SequenceNode> cachedNodes;
@@ -71,14 +68,11 @@ namespace Flux.Editor
 
         //---[Loading]--------------------------------------------------------------------------------------------------/
         
-        public void Load(Sequencer sequencer, SerializedObject serializedObject)
+        public void Load(SerializedProperty serializedProperty)
         {
-            id = sequencer.GetInstanceID();
-            this.serializedObject = serializedObject;
-            
-            var serializedProperty = serializedObject.GetIterator();
+            this.serializedProperty = serializedProperty.Copy();
+
             serializedProperty.Next(true);
-            for (var i = 0; i < 10; i++) serializedProperty.Next(false);
             rootProperty = serializedProperty.Copy();
 
             CreateRootNode();
@@ -91,7 +85,7 @@ namespace Flux.Editor
         }
         private void CreateRootNode()
         {
-            var rootNode = CreateNodeFrom(rootProperty, serializedObject, "Root", false);
+            var rootNode = CreateNodeFrom(rootProperty, "Root", false);
             rootNode.index = -1;
             rootNode.capabilities = Capabilities.Ascendable | Capabilities.Collapsible | Capabilities.Selectable;
             
@@ -102,7 +96,7 @@ namespace Flux.Editor
             for (var i = 0; i < arrayProperty.arraySize; i++)
             {
                 var subProperty = arrayProperty.GetArrayElementAtIndex(i);
-                var node = CreateNodeFrom(subProperty, serializedObject);
+                var node = CreateNodeFrom(subProperty);
                 node.index = i;
 
                 AddNode(node);
@@ -137,9 +131,6 @@ namespace Flux.Editor
         
         public void Unload()
         {
-            if (id == 0) return;
-            if (serializedObject == null) serializedObject = new SerializedObject((Sequencer)EditorUtility.InstanceIDToObject(id));
-            
             foreach (var node in cachedNodes)
             {
                 var subProperty = GetPropertyFor(node);
@@ -164,20 +155,20 @@ namespace Flux.Editor
                 indexProperty.intValue = inputNode.index;
             }
 
-            serializedObject.ApplyModifiedProperties();
-
             foreach (var edge in cachedEdges) RemoveElement(edge);
             cachedEdges.Clear();
             
             foreach (var node in cachedNodes) RemoveElement(node);
             cachedNodes.Clear();
+
+            serializedProperty.serializedObject.ApplyModifiedProperties();
         }
         
         //---[Node creation]--------------------------------------------------------------------------------------------/
 
         public void AddNode(Type nodeType, Vector2 position)
         {
-            if (serializedObject == null) return;
+            if (rootProperty == null) return;
 
             var subProperty = arrayProperty.NewElementAtEnd();
             subProperty.managedReferenceValue = (Effect)Activator.CreateInstance(nodeType);
@@ -186,9 +177,9 @@ namespace Flux.Editor
             copy.Next(true);
             
             copy.rectValue = new Rect(position, new Vector2(250, 150));
-            serializedObject.ApplyModifiedProperties();
+            serializedProperty.serializedObject.ApplyModifiedProperties();
 
-            var node = CreateNodeFrom(subProperty, serializedObject, nodeType.Name);
+            var node = CreateNodeFrom(subProperty, nodeType.Name);
             node.index = arrayProperty.arraySize - 1;
             
             AddNode(node);
@@ -198,7 +189,7 @@ namespace Flux.Editor
             var sourceProperty = arrayProperty.GetArrayElementAtIndex(sourceIndex);
             var subProperty = arrayProperty.NewElementAtEnd();
 
-            var nodeType = sourceProperty.GetEmbeddedType();
+            var nodeType = sourceProperty.GetManagedType();
             subProperty.managedReferenceValue = (Effect)Activator.CreateInstance(nodeType);
             sourceProperty.CopyTo(subProperty);
             
@@ -209,14 +200,14 @@ namespace Flux.Editor
             var rect = sourceProperty.rectValue;
             copy.rectValue = new Rect(rect.position + new Vector2(50, 50), rect.size);
 
-            serializedObject.ApplyModifiedProperties();
+            serializedProperty.serializedObject.ApplyModifiedProperties();
             
-            var node = CreateNodeFrom(subProperty, serializedObject, nodeType.Name);
+            var node = CreateNodeFrom(subProperty, nodeType.Name);
             node.index = arrayProperty.arraySize - 1;
             
             AddNode(node);
         }
-        private SequenceNode CreateNodeFrom(SerializedProperty property, SerializedObject serializedObject, string overrideName = "", bool hasInput = true)
+        private SequenceNode CreateNodeFrom(SerializedProperty property, string overrideName = "", bool hasInput = true)
         {
             var copy = property.Copy();
             copy.Next(true);
@@ -260,7 +251,7 @@ namespace Flux.Editor
                 
                 var propertyField = new PropertyField(copy);
                 propertyField.styleSheets.Add(propertyStyle);
-                propertyField.Bind(serializedObject);
+                propertyField.Bind(property.serializedObject);
                 box.Add(propertyField);
                 shouldAddPropertyBox = true;
             }
@@ -295,7 +286,7 @@ namespace Flux.Editor
         private void RemoveNode(SequenceNode node)
         {
             arrayProperty.DeleteArrayElementAtIndex(node.index);
-            serializedObject.ApplyModifiedProperties();
+            serializedProperty.serializedObject.ApplyModifiedProperties();
 
             cachedNodes.Remove(node);
             RemoveElement(node);
@@ -327,7 +318,7 @@ namespace Flux.Editor
         bool CanPaste(string data) => data != string.Empty;
         void UnserializeAndPaste(string operation, string data)
         {
-            if (operation != "Paste" || serializedObject == null) return;
+            if (operation != "Paste" || rootProperty == null) return;
 
             foreach (var subData in data.Split('/'))
             {

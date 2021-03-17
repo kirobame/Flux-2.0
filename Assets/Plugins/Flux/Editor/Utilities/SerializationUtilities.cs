@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using UnityEditor;
 using UnityEngine;
 
@@ -32,10 +34,52 @@ namespace Flux.Editor
             return arrayProperty.GetArrayElementAtIndex(arrayProperty.arraySize - 1);
         }
 
-        public static Type GetEmbeddedType(this SerializedProperty property)
+        public static Type FindType(this SerializedProperty property)
+        {
+            var slices = property.propertyPath.Split('.');
+            var type = property.serializedObject.targetObject.GetType();
+
+            for (var i = 0; i < slices.Length; i++)
+            {
+                if (slices[i] == "Array")
+                {
+                    if (type.IsArray) type = type.GetElementType();
+                    else
+                    {
+                        Type match = null;
+                        foreach (var interfaceType in type.GetInterfaces())
+                        {
+                            if (!interfaceType.IsGenericType || typeof(IEnumerable<>) != interfaceType.GetGenericTypeDefinition()) continue;
+                        
+                            match = interfaceType;
+                            break;
+                        }
+
+                        type = match.GetGenericArguments()[0];
+                    }
+                
+                    i++;
+                }     
+                else type = type.GetField(slices[i], BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.FlattenHierarchy | BindingFlags.Instance).FieldType;  
+            }
+
+            return type;
+        }
+        
+        public static Type GetManagedType(this SerializedProperty property)
         {
             var split = property.managedReferenceFullTypename.Split(' ');
             return Type.GetType($"{split[1]}, {split[0]}");
+        }
+        public static bool TryGetManagedType(this SerializedProperty property, out Type type)
+        {
+            type = null;
+            if (property.managedReferenceFullTypename == string.Empty) return false;
+            
+            var split = property.managedReferenceFullTypename.Split(' ');
+            type = Type.GetType($"{split[1]}, {split[0]}");
+
+            return true;
         }
 
         public static void CopyTo(this SerializedProperty source, SerializedProperty destination)

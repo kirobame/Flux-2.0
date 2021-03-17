@@ -18,10 +18,10 @@ namespace Flux.EDS
         //---[Data]-----------------------------------------------------------------------------------------------------/
 
         public IReadOnlyList<IFlag> Flags => flags;
-        [SerializeReference] private List<IFlag> flags = new List<IFlag>();
+        [Explicit, SerializeReference] private List<IFlag> flags = new List<IFlag>();
 
         public IReadOnlyList<IData> Table => table;
-        [SerializeReference] private List<IData> table = new List<IData>();
+        [Explicit, SerializeReference] private List<IData> table = new List<IData>();
 
         private Dictionary<Type, int> lookups;
         

@@ -14,7 +14,6 @@ namespace Flux.Editor
         public event Action<object, Vector2> onSelectEntry;
 
         private Type typeToSearch;
-        private Texture2D indent;
         private string message;
 
         private EditorWindow window;
@@ -27,10 +26,6 @@ namespace Flux.Editor
             this.message = message;
             this.window = window;
 
-            indent = new Texture2D(1,1);
-            indent.SetPixel(0,0, new Color(0,0,0,0));
-            indent.Apply();
-            
             if (searchCatalogues.ContainsKey(typeToSearch)) return;
 
             var searchCatalogue = new Category<Type>("Root");
@@ -63,7 +58,7 @@ namespace Flux.Editor
             var tree = new List<SearchTreeEntry>() { new SearchTreeGroupEntry(new GUIContent(message), 0) };
             foreach (var nodeType in searchCatalogues[typeToSearch].Values)
             {
-                tree.Add(new SearchTreeEntry(new GUIContent(nodeType.Name, indent))
+                tree.Add(new SearchTreeEntry(new GUIContent(nodeType.Name, DrawingUtilities.Placeholder))
                 {
                     userData = nodeType,
                     level = 1
@@ -81,7 +76,7 @@ namespace Flux.Editor
                     var attribute = nodeType.GetCustomAttribute<NameAttribute>();
                     if (attribute != null) name = attribute.Value;
                     
-                    tree.Add(new SearchTreeEntry(new GUIContent(name, indent))
+                    tree.Add(new SearchTreeEntry(new GUIContent(name, DrawingUtilities.Placeholder))
                     {
                         userData = nodeType,
                         level = depth + 1

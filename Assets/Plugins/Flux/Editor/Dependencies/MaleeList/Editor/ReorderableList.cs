@@ -172,7 +172,6 @@ namespace Malee.List {
 			this.elementIcon = elementIcon;
 
 			id = GetHashCode();
-			list.isExpanded = true;
 			label = new GUIContent(list.displayName);
 			pageInfoContent = new GUIContent();
 			pageSizeContent = new GUIContent();
@@ -635,6 +634,22 @@ namespace Malee.List {
 
 			label = EditorGUI.BeginProperty(titleRect, label, list);
 
+			var Ev = UnityEngine.Event.current;
+			if (titleRect.Contains(Ev.mousePosition))
+			{
+				if (Ev.type == EventType.MouseDown && Ev.button == 1)
+				{
+					var genericMenu = new GenericMenu();
+					genericMenu.AddItem(new GUIContent("Clear"), false, () =>
+					{
+						List.arraySize = 0;
+						List.serializedObject.ApplyModifiedProperties();
+					});
+
+					genericMenu.ShowAsContext();
+				}
+			}
+
 			if (drawHeaderCallback != null) {
 
 				drawHeaderCallback(titleRect, label);
@@ -648,8 +663,9 @@ namespace Malee.List {
 				bool isExpanded = EditorGUI.Foldout(titleRect, list.isExpanded, label, true);
 
 				if (EditorGUI.EndChangeCheck()) {
-
+					
 					list.isExpanded = isExpanded;
+					list.serializedObject.ApplyModifiedPropertiesWithoutUndo();
 				}
 			}
 			else {

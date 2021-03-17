@@ -226,10 +226,10 @@ namespace Flux.Editor
                 subRect.y += subRect.height + 4.0f;
                 Undo.RecordObject(serializedObject.targetObject, $"{property.propertyPath} - Setting value");
                 
-                if (property.TryGetDrawer(out var drawer))
+                if (property.TryGetCategorizedDrawer(out var drawer))
                 {
                     var label = new GUIContent(property.displayName);
-                    subRect.height = property.GetHeight(label);
+                    subRect.height = property.GetCategorizedHeight(label);
                     drawer.OnGUI(subRect, property, label);
                 }
                 else

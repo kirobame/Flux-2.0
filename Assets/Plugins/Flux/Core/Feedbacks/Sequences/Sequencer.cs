@@ -1,59 +1,38 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System.Collections.Generic;
 using UnityEngine;
 
 namespace Flux.Feedbacks
 {
     public class Sequencer : MonoBehaviour
     {
-        [HideInInspector, SerializeField] private Empty root = new Empty();
-        [HideInInspector, SerializeReference] private List<Effect> effects = new List<Effect>();
-        
-        private EventArgs args;
-        private bool isPlaying;
-        
-        //---[Initialization]-------------------------------------------------------------------------------------------/
-        
-        void Awake()
-        {
-            Initialize(root);
-            foreach (var effect in effects) Initialize(effect);
-        }
-        private void Initialize(Effect effect)
-        {
-            var cast = (IEffect)effect;
-
-            var links = new Effect[cast.LinkIndices.Count()];
-            var count = 0;
-                
-            foreach (var linkIndex in cast.LinkIndices)
-            {
-                links[count] = effects[linkIndex];
-                count++;
-            }
-                
-            cast.Inject(links);
-            effect.Bootup(root, effects);
-        }
-        
-        //---[Core]-----------------------------------------------------------------------------------------------------/
+        private List<Sequence> sequences = new List<Sequence>();
 
         void Update()
         {
-            if (isPlaying) isPlaying = !root.Update(args);
+            var index = 0;
+            while (index < sequences.Count)
+            {
+                if (!UpdateAt(index)) index++;
+            }
         }
-
-        public void Play(EventArgs args)
+        
+        public void Add(Sequence sequence)
         {
-            this.args = args;
+            if (sequences.Contains(sequence)) return;
             
-            root.Ready();
-            foreach (var effect in effects) effect.Ready();
-
-            isPlaying = true;
+            sequences.Add(sequence);
+            UpdateAt(sequences.Count - 1);
         }
-        public void Stop() => isPlaying = false;
+        public void Remove(Sequence sequence) => sequences.Remove(sequence);
+
+        private bool UpdateAt(int index)
+        {
+            if (sequences[index].Update()) return false;
+            
+            sequences[index].Stop(false);
+            sequences.RemoveAt(index);
+            
+            return true;
+        }
     }
 }

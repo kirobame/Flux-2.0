@@ -33,37 +33,10 @@ namespace Flux.Editor
             if (types.Length == 0) EditorGUI.LabelField(rect, "There are no enum addresses!");
             else
             {
-                Rect leftRect;
-                Rect rightRect;
-                
-                if (property.depth <= 1)
-                {
-                    var labelRect = new Rect(rect.position, new Vector2(EditorGUIUtility.labelWidth, rect.height));
-                    EditorGUI.LabelField(labelRect, label);
-                    
-                    var contentRect = new Rect(new Vector2(labelRect.xMax, rect.yMin), new Vector2(rect.width - labelRect.width, rect.height));
-                    contentRect = contentRect.Indent(2.0f);
-                    var tuple = contentRect.Split(4.0f);
-
-                    leftRect = tuple.left;
-                    leftRect = leftRect.Stretch(0.0f, 1.0f, 0.0f, 0.0f);
-                    rightRect = tuple.right;
-                }
-                else
-                {
-                    var copy = rect.Indent(3.0f);
-                    var tuple = copy.Split(4.0f);
-                    
-                    leftRect = tuple.left;
-                    leftRect = leftRect.Stretch(0.0f, 5.5f, 0.0f, 0.0f);
-                    
-                    rightRect = tuple.right;
-                    rightRect = rightRect.Stretch(5.5f, 2.75f, 0.0f, 0.0f);
-                }
-                
+                var header = rect.GetLayout();
                 EditorGUI.BeginChangeCheck();
-                
-                typeIndex = EditorGUI.Popup(leftRect, GUIContent.none, typeIndex, options);
+
+                typeIndex = EditorGUI.Popup(header.label, GUIContent.none, typeIndex, options);
                 property.stringValue = types[typeIndex].AssemblyQualifiedName;
 
                 property.NextVisible(false);
@@ -75,9 +48,9 @@ namespace Flux.Editor
                     property.intValue = 0;
                 }
                 
-                if (hasFlag) flag = EditorGUI.EnumFlagsField(rightRect, GUIContent.none, flag);
-                else flag = EditorGUI.EnumPopup(rightRect, GUIContent.none, flag);
-                
+                if (hasFlag) flag = EditorGUI.EnumFlagsField(header.value, GUIContent.none, flag);
+                else flag = EditorGUI.EnumPopup(header.value, GUIContent.none, flag);
+
                 property.intValue = Convert.ToByte(flag);
             }
             

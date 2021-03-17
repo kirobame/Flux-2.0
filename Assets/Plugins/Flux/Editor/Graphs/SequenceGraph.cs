@@ -7,56 +7,41 @@ namespace Flux.Editor
 {
     public class SequenceGraph : EditorWindow
     {
-        private Sequencer activeSequencer;
-        private SerializedObject serializedObject;
+        private SerializedProperty serializedProperty;
         
         private SequenceGraphView graphView;
         private bool hasBeenFramed;
         
         //---[Lifetime handling]----------------------------------------------------------------------------------------/
-        
-        [MenuItem("Tools/Flux/Sequence")]
-        public static void Open()
-        {
-            var window = GetWindow<SequenceGraph>();
-            window.titleContent = EditorGUIUtility.TrTextContentWithIcon("Sequence", "SceneViewFx");
-        }
-        
+
         void OnEnable()
         {
             graphView = new SequenceGraphView(this);
             graphView.StretchToParentSize();
             rootVisualElement.Add(graphView);
-            
-            OnSelectionChange();
         }
         void OnDisable()
         {
-            if (activeSequencer != null) graphView.Unload();
+            if (serializedProperty != null) graphView.Unload();
             rootVisualElement.Remove(graphView);
         }
 
         //---[View shift]-----------------------------------------------------------------------------------------------/
-        
-        void OnSelectionChange()
-        {
-            if (Selection.activeGameObject == null || !Selection.activeGameObject.TryGetComponent<Sequencer>(out var sequencer)) return;
 
-            if (activeSequencer != null)
+        public void Initialize(SerializedProperty serializedProperty)
+        {
+            if (this.serializedProperty  != null)
             {
-                serializedObject = null;
-                activeSequencer = null;
-                
+                this.serializedProperty  = null;
                 graphView.Unload();
             }
-            
-            activeSequencer = sequencer;
-            serializedObject = new SerializedObject(activeSequencer);
-            
-            graphView.Load(activeSequencer, serializedObject);
+
+            this.serializedProperty = serializedProperty;
+                
+            graphView.Load(serializedProperty.Copy());
             hasBeenFramed = false;
         }
-        
+
         //---[Utilities]------------------------------------------------------------------------------------------------/
 
         void OnGUI()
