@@ -141,7 +141,7 @@ namespace Flux.Editor
 
             property.serializedObject.ApplyModifiedProperties();
             GUI.enabled = true;
-            
+
             EditorGUI.EndProperty();
         }
         public override float GetPropertyHeight(SerializedProperty property, GUIContent label) => EditorGUIUtility.singleLineHeight * 4f + EditorGUIUtility.standardVerticalSpacing * 4f;

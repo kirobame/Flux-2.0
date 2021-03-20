@@ -2,7 +2,6 @@
 using System.Globalization;
 using System.Linq;
 using Flux.Feedbacks;
-using Sirenix.Utilities.Editor;
 using UnityEditor;
 using UnityEditor.Experimental.GraphView;
 using UnityEngine;

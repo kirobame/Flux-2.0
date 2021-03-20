@@ -22,7 +22,7 @@ namespace Example05
                 transform.Translate(delta);
                 
                 // Calling the event once the operation has been done
-                Events.Call(GameEvent.OnPlayerMove, delta); // == Events.Call(GameEvent.OnPlayerMove, new WrapperArgs<Vector2>(delta));
+                Events.ZipCall(GameEvent.OnPlayerMove, delta); // == Events.Call(GameEvent.OnPlayerMove, new WrapperArgs<Vector2>(delta));
             }
         }
     }

@@ -3,6 +3,82 @@ using UnityEngine;
 
 namespace Flux.Editor
 {
+    public static class EventUtilities
+    {
+        public static bool OnMouseDown(this UnityEngine.Event source, Rect rect, int index)
+        {
+            var id = GUIUtility.GetControlID(FocusType.Passive);
+            var type = source.GetTypeForControl(id);
+                
+            if (type == EventType.MouseDown && source.button == index && rect.Contains(source.mousePosition))
+            {
+                GUIUtility.hotControl = id;
+                source.Use();
+                
+                return true;
+            }
+            else return false;
+        }
+        public static bool OnMouseDown(this UnityEngine.Event source, int index)
+        {
+            var id = GUIUtility.GetControlID(FocusType.Passive);
+            var type = source.GetTypeForControl(id);
+                
+            if (type == EventType.MouseDown && source.button == index)
+            {
+                GUIUtility.hotControl = id;
+                source.Use();
+                
+                return true;
+            }
+            else return false;
+        }
+
+        public static bool OnMouseUp(this UnityEngine.Event source, Rect rect, int index)
+        {
+            var id = GUIUtility.GetControlID(FocusType.Passive);
+            var type = source.GetTypeForControl(id);
+            
+            if (type == EventType.MouseUp && source.button == index && rect.Contains(source.mousePosition))
+            {
+                GUIUtility.hotControl = 0;
+                source.Use();
+                
+                return true;
+            }
+            else return false;
+        }
+        public static bool OnMouseUp(this UnityEngine.Event source, int index)
+        {
+            var id = GUIUtility.GetControlID(FocusType.Passive);
+            var type = source.GetTypeForControl(id);
+            
+            if (type == EventType.MouseUp && source.button == index)
+            {
+                GUIUtility.hotControl = 0;
+                source.Use();
+                
+                return true;
+            }
+            else return false;
+        }
+
+        public static bool OnMouseMoveDrag(this UnityEngine.Event source)
+        {
+            var id = GUIUtility.GetControlID(FocusType.Passive);
+            var type = source.GetTypeForControl(id);
+            
+            if (type == EventType.MouseDrag)
+            {
+                GUIUtility.hotControl = id;
+                source.Use();
+                
+                return true;
+            }
+            else return false;
+        }
+    }
+    
     public static class DrawingUtilities
     {
         public static float Margin => EditorGUIUtility.standardVerticalSpacing;

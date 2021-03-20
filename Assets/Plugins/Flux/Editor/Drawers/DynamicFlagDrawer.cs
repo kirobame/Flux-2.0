@@ -2,11 +2,11 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using Sirenix.Utilities;
 using UnityEditor;
 using UnityEditor.UIElements;
 using UnityEngine;
 using UnityEngine.UIElements;
+using Object = UnityEngine.Object;
 
 namespace Flux.Editor
 {
@@ -17,7 +17,9 @@ namespace Flux.Editor
         private static Type[] types;
         private static GUIContent[] options;
 
+        private Object lastTarget;
         private bool hasBeenLocallyInitialized;
+        
         private bool hasFlag;
         private int typeIndex;
         private Enum flag;
@@ -28,7 +30,9 @@ namespace Flux.Editor
             property.NextVisible(true);
             
             if (!hasBeenGloballyInitialized) InitializeGlobally();
-            if (!hasBeenLocallyInitialized) InitializeLocally(property.Copy());
+
+            var target = property.serializedObject.targetObject;
+            if (!hasBeenLocallyInitialized || target != lastTarget) InitializeLocally(property.Copy());
 
             if (types.Length == 0) EditorGUI.LabelField(rect, "There are no enum addresses!");
             else
@@ -38,7 +42,7 @@ namespace Flux.Editor
 
                 typeIndex = EditorGUI.Popup(header.label, GUIContent.none, typeIndex, options);
                 property.stringValue = types[typeIndex].AssemblyQualifiedName;
-
+                
                 property.NextVisible(false);
                 if (EditorGUI.EndChangeCheck())
                 {
@@ -50,13 +54,14 @@ namespace Flux.Editor
                 
                 if (hasFlag) flag = EditorGUI.EnumFlagsField(header.value, GUIContent.none, flag);
                 else flag = EditorGUI.EnumPopup(header.value, GUIContent.none, flag);
-
+                
                 property.intValue = Convert.ToByte(flag);
             }
             
+            property.serializedObject.ApplyModifiedProperties();
             EditorGUI.EndProperty();
         }
-
+        
         private void InitializeGlobally()
         {
             hasBeenGloballyInitialized = true;
@@ -90,6 +95,8 @@ namespace Flux.Editor
             
             property.NextVisible(false);
             flag = (Enum)Enum.ToObject(types[typeIndex], (byte)property.intValue);
+
+            lastTarget = property.serializedObject.targetObject;
         }
 
         private void SetupFlag()

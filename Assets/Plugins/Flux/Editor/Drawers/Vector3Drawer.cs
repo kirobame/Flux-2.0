@@ -38,6 +38,8 @@ namespace Flux.Editor
             property.floatValue = EditorGUI.FloatField(zRect, GUIContent.none, property.floatValue);
             
             EditorGUIUtility.labelWidth = labelWidth;
+            
+            property.serializedObject.ApplyModifiedProperties();
             EditorGUI.EndProperty();
         }
 

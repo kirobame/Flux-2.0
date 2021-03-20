@@ -48,6 +48,7 @@ namespace Flux.Editor
                 window.Initialize(property);
             }
             
+            property.serializedObject.ApplyModifiedProperties();
             EditorGUI.EndProperty();
         }
 

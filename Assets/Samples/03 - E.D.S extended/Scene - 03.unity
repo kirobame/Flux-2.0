@@ -225,7 +225,7 @@ MonoBehaviour:
   references:
     version: 1
     00000000:
-      type: {class: DynamicFlag, ns: Flux, asm: Assembly-CSharp-firstpass}
+      type: {class: DynamicFlag, ns: Flux, asm: Flux}
       data:
         type: Example03.Health, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
           PublicKeyToken=null
@@ -235,6 +235,7 @@ MonoBehaviour:
       data:
         value: 0
         step: 1
+        isLocked: 0
 --- !u!1 &561000187
 GameObject:
   m_ObjectHideFlags: 0
@@ -429,7 +430,7 @@ MonoBehaviour:
   references:
     version: 1
     00000000:
-      type: {class: DynamicFlag, ns: Flux, asm: Assembly-CSharp-firstpass}
+      type: {class: DynamicFlag, ns: Flux, asm: Flux}
       data:
         type: Example03.Health, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
           PublicKeyToken=null
@@ -439,6 +440,7 @@ MonoBehaviour:
       data:
         value: 0
         step: 3
+        isLocked: 0
 --- !u!1 &1155056422
 GameObject:
   m_ObjectHideFlags: 0

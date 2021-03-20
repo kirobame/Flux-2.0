@@ -9,7 +9,7 @@ namespace Flux
         public Enum Value { get; private set; }
 
         [SerializeField] private string type;
-        [SerializeField] private byte value;
+        [SerializeField] private int value;
         
         public void Bootup()
         {

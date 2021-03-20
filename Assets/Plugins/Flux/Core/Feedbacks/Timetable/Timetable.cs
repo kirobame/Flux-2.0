@@ -7,7 +7,7 @@ using UnityEngine;
 namespace Flux.Feedbacks
 {
     [Serializable]
-    public class Timetable
+    public class Timetable : IBootable
     {
         public event Action onEndReached;
         public event Action onStartReached;
@@ -27,7 +27,8 @@ namespace Flux.Feedbacks
         public bool isLooping;
         
         private Dictionary<Id, Pin> pins = new Dictionary<Id, Pin>();
-        
+
+        private bool hasBeenBootedUp;
         private float time;
         
         //---[Accessors]------------------------------------------------------------------------------------------------/
@@ -48,7 +49,11 @@ namespace Flux.Feedbacks
         
         //---[Initialization]-------------------------------------------------------------------------------------------/
 
-        public void Initialize() { foreach (var segment in segments) segment.Open(this); } 
+        public void Bootup()
+        {
+            foreach (var segment in segments) segment.Open(this);
+            hasBeenBootedUp = true;
+        } 
         
         //---[Segments handling]----------------------------------------------------------------------------------------/
         
@@ -68,9 +73,17 @@ namespace Flux.Feedbacks
         public void AddPin(Id key, Pin pin) => pins.Add(key, pin);
         public void RemovePin(Id key) => pins.Remove(key);
 
-        public void SubscribeTo<T>(Id key, Action<T> method) => ((Pin<T>)pins[key]).callback += method;
-        public void UnsubscribeFrom<T>(Id key, Action<T> method) => ((Pin<T>)pins[key]).callback -= method;
-        
+        public void SubscribeTo<T>(Id key, Action<T> method)
+        {
+            if (!hasBeenBootedUp) Bootup();
+            ((Pin<T>)pins[key]).callback += method;
+        }
+        public void UnsubscribeFrom<T>(Id key, Action<T> method)
+        {
+            if (!hasBeenBootedUp) Bootup();
+            ((Pin<T>)pins[key]).callback -= method;
+        }
+
         //---[Core]-----------------------------------------------------------------------------------------------------/
         
         public void MoveBy(float delta)
@@ -100,7 +113,11 @@ namespace Flux.Feedbacks
             this.time = Mathf.Clamp(time, 0.0f, duration);
             Update();
         }
-        
-        private void Update() { foreach (var segment in segments) segment.Update(time / duration); }
+
+        private void Update()
+        {
+            if (!hasBeenBootedUp) Bootup();
+            foreach (var segment in segments) segment.Update(time / duration);
+        }
     }
 }

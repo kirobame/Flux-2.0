@@ -9,8 +9,13 @@ namespace Flux.Feedbacks
     [Serializable]
     public class Sequence : IBootable
     {
+        public EventArgs Args => args;
+        public bool IsPlaying => isPlaying;
+        
         [HideInInspector, SerializeField] private Empty root = new Empty();
         [HideInInspector, SerializeReference] private List<Effect> effects = new List<Effect>();
+
+        private bool hasBeenBootedUp;
         
         private EventArgs args;
         private bool isPlaying;
@@ -21,6 +26,8 @@ namespace Flux.Feedbacks
         {
             Initialize(root);
             foreach (var effect in effects) Initialize(effect);
+
+            hasBeenBootedUp = true;
         }
         
         private void Initialize(Effect effect)
@@ -47,8 +54,6 @@ namespace Flux.Feedbacks
             if (isPlaying) return;
             
             Prepare(args);
-            isPlaying = true;
-            
             SequenceHandler.Add(this);
         }
         public void Stop(bool interruption = true)
@@ -61,10 +66,14 @@ namespace Flux.Feedbacks
 
         public void Prepare(EventArgs args)
         {
+            if (!hasBeenBootedUp) Bootup();
+            
             this.args = args;
             
             root.Ready();
             foreach (var effect in effects) effect.Ready();
+            
+            isPlaying = true;
         }
         public bool Update()
         {

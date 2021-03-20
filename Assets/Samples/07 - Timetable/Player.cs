@@ -15,8 +15,6 @@ namespace Example07
 
         void Awake()
         {
-            timetable.Initialize(); // Every timetable needs to be initialized to give a chance for every segment to boot itself up
-            
             // Subscribes to the FloatOutput segment by giving its outgoing Id
             timetable.SubscribeTo<float>(new Id('H', 'G', 'T'), value =>
             {

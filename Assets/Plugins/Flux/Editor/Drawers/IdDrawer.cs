@@ -40,6 +40,8 @@ namespace Flux.Editor
             property.serializedObject.ApplyModifiedProperties();
             
             EditorGUIUtility.labelWidth = labelWidth;
+            
+            property.serializedObject.ApplyModifiedProperties();
             EditorGUI.EndProperty();
         }
 

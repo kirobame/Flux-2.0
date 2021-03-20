@@ -109,8 +109,6 @@ namespace Flux.Event
                 var wrapper = new EventWrapper();
 
                 Open(key, wrapper);
-                registry.Add(key, wrapper);
-
                 return wrapper;
             }
 
@@ -174,10 +172,10 @@ namespace Flux.Event
         }
 
         public static void Call(Enum address) => Call(address, EventArgs.Empty);
-        public static void Call<T1>(Enum address, in T1 argOne) => Call(address, new WrapperArgs<T1>(argOne));
-        public static void Call<T1,T2>(Enum address, in T1 argOne, in T2 argTwo) => Call(address, new WrapperArgs<T1,T2>(argOne, argTwo));
-        public static void Call<T1,T2,T3>(Enum address, in T1 argOne, in T2 argTwo, in T3 argThree) => Call(address, new WrapperArgs<T1,T2,T3>(argOne, argTwo, argThree));
-        public static void Call<T1,T2,T3,T4>(Enum address, in T1 argOne, in T2 argTwo, in T3 argThree, in T4 argFour) => Call(address, new WrapperArgs<T1,T2,T3,T4>(argOne, argTwo, argThree, argFour));
+        public static void ZipCall<T1>(Enum address, in T1 argOne) => Call(address, new WrapperArgs<T1>(argOne));
+        public static void ZipCall<T1,T2>(Enum address, in T1 argOne, in T2 argTwo) => Call(address, new WrapperArgs<T1,T2>(argOne, argTwo));
+        public static void ZipCall<T1,T2,T3>(Enum address, in T1 argOne, in T2 argTwo, in T3 argThree) => Call(address, new WrapperArgs<T1,T2,T3>(argOne, argTwo, argThree));
+        public static void ZipCall<T1,T2,T3,T4>(Enum address, in T1 argOne, in T2 argTwo, in T3 argThree, in T4 argFour) => Call(address, new WrapperArgs<T1,T2,T3,T4>(argOne, argTwo, argThree, argFour));
 
         //---[Subscribe]-------------------------------------------------------------------------------------------------/
 
@@ -214,9 +212,7 @@ namespace Flux.Event
             if (!registry.TryGetValue(key, out var wrapper))
             {
                 wrapper = new EventWrapper();
-
                 Open(key, wrapper);
-                registry.Add(key, wrapper);
             }
 
             if (wrapper.Relay<TRelay>(method, out var relay)) registry[key].callback += relay.TryCall;
@@ -228,6 +224,7 @@ namespace Flux.Event
         public static void Unsubscribe(Enum address, Action<EventArgs> method)
         {
             var key = translator.Translate(address);
+            
             if (registry.ContainsKey(key)) registry[key].callback -= method;
             else if (queue.ContainsKey(key)) queue[key].Remove(method);
         }

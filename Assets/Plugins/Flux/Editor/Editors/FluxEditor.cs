@@ -33,6 +33,8 @@ namespace Flux.Editor
                 }
                 else EditorGUILayout.PropertyField(property);
             }
+
+            serializedObject.ApplyModifiedProperties();
         }
 
         private void Initialize()

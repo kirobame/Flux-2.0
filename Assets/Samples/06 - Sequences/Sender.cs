@@ -1,6 +1,7 @@
 ﻿using System;
 using Flux;
 using Flux.Event;
+using Flux.Feedbacks;
 using UnityEngine;
 
 namespace Example06
@@ -8,7 +9,7 @@ namespace Example06
     public class Sender : MonoBehaviour
     {
         [SerializeField] private float channel;
-        
+
         void Awake()
         {
             // Create the EventArgs which will be sent to the sequence & subscribe to its callback to resume logic after the feedback is done
